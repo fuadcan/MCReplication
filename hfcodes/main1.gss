@@ -1,0 +1,645 @@
+
+/*
+  ** Procedure Bartlett:
+  **
+  ** Purpose:
+  ** Calculates Bartlett kernel.
+**
+  ** Format:
+  ** kern = Bartlett( T , m )
+  **
+    ** Input:
+    ** T    scalar, sample size.
+  ** m    scalar, bandwidth.
+  **
+    ** Output:
+    ** kern (Tx1)-vector, kernel weights for the estimated autocovariances for the
+  **       estimation of the smoothed periodogram.
+  **
+    ** Note:
+    ** k(m,j) = ( 1 - (j/(m+1)) )       for j <= m
+    **        = 0                       otherwise
+    */
+      proc(1) = bartlett( T , m );
+      
+      local j , kern;
+      
+      j = seqa(0,1,T);
+      kern = ( 1 - j./(m+1));
+      kern = kern.*(kern.>0);
+      
+      retp(kern);
+      endp;
+      
+      
+      /*
+        ** Procedure CLUSCORR:
+        **
+        ** Purpose:
+        ** Computes cluster-correlation.
+      **
+        ** Format:
+        ** r = ClusCorr( C1 , C2 );
+        **
+          ** Input:
+          ** C1       Nx1 vector, outcome of cluster procedure
+        ** C2       Nx1 vector, outcome of cluster procedure
+        **
+          ** Output:
+          ** r        scalar, cluster-correlation between C1 and C2.
+        */
+          Proc(1) = ClusCorr( C1 , C2 );
+          
+          Local D1 , D2 , n , r;
+          
+          n = Rows(C1);
+          If ( Rows(C2) /= n );
+          ErrorLog("C1 and C2 must have same number of rows");
+          End;
+          EndIf;
+          
+          D1 = ( C1 .== C1' );
+                 D2 = ( C2 .== C2' );
+          
+          r = (SumC(SumC(D1.*D2))-n);
+          r = r./SqRt( (SumC(SumC(D1))-n).*(SumC(SumC(D2))-n) );
+          r = sqrt(r);
+          
+          RetP(r);
+          EndP;
+          
+          
+          /*
+            ** Procedure ClusOut:
+            **
+            ** Purpose:
+            ** Generates output for clustering algorithm.
+          **
+            ** Format:
+            ** ClusOut( C , ClusName );
+          **
+            ** Input:
+            ** C        Kx1 vector, containing number of cluster in which series are
+          **              included (returned from CLUSTER).
+          ** ClusName Kx1 character vector, containing names of series.
+          **
+            ** Output:
+            ** None, the procedure prints output. If the output is to be captured in an
+          ** ASCII then open an output-file before calling this procedure.
+          */
+            Proc(0) = ClusOut( C , ClusName );
+            
+            Local K , NoSer , NoClust , i , Omat ;
+            
+            K = Rows(C);
+            NoClust = MaxC( C );
+            NoSer = SeqA(1,1,NoClust)~SumC( C.==(SeqA(1,1,NoClust)') );
+                                                 NoSer = Rev(SortC(NoSer,2));
+                                                 
+                                                 
+                                                 
+                                                 i = 0;
+                                                 Do While ( i < NoClust );
+                                                 i = i+1;
+                                                 Omat = DelIf( ClusName , (C./=NoSer[i,1]) );
+                                                 Format /ld 8,0;
+                                                 $Omat';
+                                                 
+                                                 EnDo;
+                                                 
+                                                 EndP;
+                                                 
+                                                 
+                                                 /*
+                                                   ** Procedure cluster:
+                                                   **
+                                                   ** Purpose:
+                                                   ** Performs cluster algorithm for August 1998 version of convergence paper.
+                                                 **
+                                                   ** Format:
+                                                   ** { C0 , C1 } = cluster( Y , l , critpval );
+                                                 **
+                                                   ** Input:
+                                                   ** Y        (TxK)-matrix, containing series in columns.
+                                                 ** l        scalar, bandwith parameter for Bartlett window.
+                                                 ** critpval scalar, critical p-value used as stopcriterion for algorithm.
+                                                 **
+                                                   ** Output:
+                                                   ** C0       (Kx1)-vector, containing cluster numbers of corresponding series
+                                                 **              for asymptotically perfect convergence.
+                                                 ** C1       (kx1)-vector, containing cluster numbers of corresponding series
+                                                 **              for asymptotically relative convergence.
+                                                 */
+                                                   Proc(2) = cluster( Y , l , critpval );
+                                                 
+                                                 local asymdis0 , asymdis1 , C , K , T , M0 , M1 , p0mat , p1mat , i , j , n ,
+                                                 w0 , w1 , p0 , p1 , clussize , noclus , maxrow , maxcol ,
+                                                 cluscntr , alfa , Y1 , clusvec1 , clusvec2 , cluscomb , c0 , c1 ,
+                                                 clusmax , clusmin ;
+                                                 
+                                                 @ initializing parameters @
+                                                   K = cols(Y);
+                                                 T = rows(Y);
+                                                 C = seqa(1,1,K);
+                                                 M0 = zeros( k , k );
+                                                 M1 = zeros( k , k );
+                                                 p0mat = zeros( k , k );
+                                                 p1mat = zeros( k , k );
+                                                 
+                                                 @ loading matrices containing asymptotic distributions of tests @
+                                                   
+                                                   load asymdis0[50,99]= hfcodes/ASYMDST0.txt;
+                                                 load asymdis1[50,99]= hfcodes/ASYMDST1.txt;
+                                                 
+                                                 
+                                                 ClS;
+                                                 /*
+                                                   "Cluster algorithm v 3.0";
+                                                 "=======================";
+                                                 Locate 6,1; "Initializing....                       ";
+                                                 */
+                                                   i = 0;
+                                                 n = 0;
+                                                 do while ( i < k );
+                                                 i = i+1;
+                                                 
+                                                 j = 0;
+                                                 do while ( j < i );
+                                                 j = j+1;
+                                                 n = n+1;
+                                                 /*
+                                                   locate 9,1;
+                                                 format /ld 8,0;
+                                                 "combination " n " of " (0.5.*K.*(K+1));
+                                                 */
+                                                   if ( i /= j );
+                                                 
+                                                 Y1 = Y[.,(i~j)];
+                                                 alfa = cointmat( cols( Y1 ) );
+                                                 Y1 = Y1*alfa';
+                                                 { w0 , w1 } = mvkpss( Y1 , l );
+                                                 { p0 , p1 } = pvalue( w0 , w1 , cols(Y1) , asymdis0 , asymdis1 );
+                                                 
+                                                 cluscomb = (i~j);
+                                                 clussize = cols(cluscomb);
+                                                 M0[cluscomb,cluscomb] = w0.*ones(clussize,clussize);
+                                                 M1[cluscomb,cluscomb] = w1.*ones(clussize,clussize);
+                                                 p0mat[cluscomb,cluscomb] = p0.*ones(clussize,clussize);
+                                                 p1mat[cluscomb,cluscomb] = p1.*ones(clussize,clussize);
+                                                 
+                                                 M0 = M0.*(eye(k).==0);
+                                                 M1 = M1.*(eye(k).==0);
+                                                 p0mat = p0mat.*(eye(k).==0);
+                                                 p1mat = p1mat.*(eye(k).==0);
+                                                 
+                                                 endif;
+                                                 
+                                                 endo; @ j @
+                                                 endo; @ i @
+                                                 
+                                                 /*
+                                                 Locate 6,1; "Clustering... Asymptotically perfect convergence";
+                                                 locate 9,1;
+                                                 "                                                                         ";
+                                                 */
+                                                 noclus = k ;
+                                                 do while (maxc(maxc(p0mat))>critpval) and ( noclus > 1 );
+                                                 noclus = noclus-1;
+                                                 /*
+                                                 locate 9,1;
+                                                 format /ld 8,0;
+                                                 noclus " clusters, out of " k " series ";
+                                                 */
+                                                 if ( noclus > 1 );
+                                                 { maxrow , maxcol } = locmin( -p0mat );
+                                                 cluscntr = ( c .== c[maxrow] )+( c.==c[maxcol] );
+                                                 cluscntr = cluscntr.*seqa(1,1,k);
+                                                 cluscntr = delif( cluscntr , (cluscntr.==0) );
+                                                 clussize = rows(cluscntr);
+                                                 clusmax  = maxc(c[maxrow]|c[maxcol]);
+                                                 clusmin  = minc(c[maxrow]|c[maxcol]);
+                                                 
+                                                 c[cluscntr] = clusmin.*ones(clussize,1);
+                                                 c = c-(c.>clusmax);
+                                                 
+                                                 i = 0;
+                                                 do while ( i < noclus );
+                                                 i = i+1;
+                                                 
+                                                 if ( i /= clusmin );
+                                                 cluscntr = ( c.==clusmin )+
+                                                 ( c.==i );
+                                                 cluscntr = cluscntr.*seqa(1,1,k);
+                                                 cluscntr = delif( cluscntr , (cluscntr.==0) );
+                                                 clussize = rows(cluscntr);
+                                                 
+                                                 y1 = y[.,cluscntr];
+                                                 alfa = cointmat( cols(y1) );
+                                                 y1 = y1*alfa';
+                                                 
+                                                 { w0 , w1 } = mvkpss( Y1 , l );
+                                                 { p0 , p1 } = pvalue( w0 , w1 , cols(Y1) , asymdis0 , asymdis1 );
+                                                 
+                                                 clusvec1 = ( c.==clusmin ).*seqa(1,1,k);
+                                                 clusvec1 = delif( clusvec1 , (clusvec1.==0) );
+                                                 clusvec2 = ( c.==i ).*seqa(1,1,k);
+                                                 clusvec2 = delif( clusvec2 , (clusvec2.==0) );
+                                                 
+                                                 M0[clusvec1,clusvec2] = w0.*ones(rows(clusvec1),rows(clusvec2));
+                                                 M0[clusvec2,clusvec1] = w0.*ones(rows(clusvec2),rows(clusvec1));
+                                                 M1[clusvec1,clusvec2] = w1.*ones(rows(clusvec1),rows(clusvec2));
+                                                 M1[clusvec2,clusvec1] = w1.*ones(rows(clusvec2),rows(clusvec1));
+                                                 p0mat[clusvec1,clusvec2]
+                                                 = p0.*ones(rows(clusvec1),rows(clusvec2));
+                                                 p0mat[clusvec2,clusvec1]
+                                                 = p0.*ones(rows(clusvec2),rows(clusvec1));
+                                                 p1mat[clusvec1,clusvec2]
+                                                 = p1.*ones(rows(clusvec1),rows(clusvec2));
+                                                 p1mat[clusvec2,clusvec1]
+                                                 = p1.*ones(rows(clusvec2),rows(clusvec1));
+                                                 M0[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 M1[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 p0mat[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 p1mat[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 
+                                                 endif;
+                                                 endo;
+                                                 else;
+                                                 c = ones(k,1);
+                                                 endif;
+                                                 endo;
+                                                 
+                                                 c0 = c;
+                                                 /*
+                                                   Locate 6,1; "Clustering... Asymptotically relative convergence";
+                                                 locate 9,1;
+                                                 "                                                                         ";
+                                                 */
+                                                   do while (maxc(maxc(p1mat))>critpval) and ( noclus > 1 );
+                                                 noclus = noclus-1;
+                                                 /*
+                                                   locate 9,1;
+                                                 format /ld 8,0;
+                                                 noclus " clusters, out of " k " series ";
+                                                 */
+                                                   if ( noclus > 1 );
+                                                 { maxrow , maxcol } = locmin( -p1mat );
+                                                 cluscntr = ( c .== c[maxrow] )+( c.==c[maxcol] );
+                                                 cluscntr = cluscntr.*seqa(1,1,k);
+                                                 cluscntr = delif( cluscntr , (cluscntr.==0) );
+                                                 clussize = rows(cluscntr);
+                                                 clusmax  = maxc(c[maxrow]|c[maxcol]);
+                                                 clusmin  = minc(c[maxrow]|c[maxcol]);
+                                                 
+                                                 c[cluscntr] = clusmin.*ones(clussize,1);
+                                                 c = c-(c.>clusmax);
+                                                 
+                                                 i = 0;
+                                                 do while ( i < noclus );
+                                                 i = i+1;
+                                                 
+                                                 if ( i /= clusmin );
+                                                 cluscntr = ( c.==clusmin )+
+                                                   ( c.==i );
+                                                 cluscntr = cluscntr.*seqa(1,1,k);
+                                                 cluscntr = delif( cluscntr , (cluscntr.==0) );
+                                                 clussize = rows(cluscntr);
+                                                 
+                                                 y1 = y[.,cluscntr];
+                                                 alfa = cointmat( cols(y1) );
+                                                 y1 = y1*alfa';
+                                                 
+                                                 { w0 , w1 } = mvkpss( Y1 , l );
+                                                 { p0 , p1 } = pvalue( w0 , w1 , cols(Y1) , asymdis0 , asymdis1 );
+                                                 
+                                                 clusvec1 = ( c.==clusmin ).*seqa(1,1,k);
+                                                 clusvec1 = delif( clusvec1 , (clusvec1.==0) );
+                                                 clusvec2 = ( c.==i ).*seqa(1,1,k);
+                                                 clusvec2 = delif( clusvec2 , (clusvec2.==0) );
+                                                 
+                                                 M0[clusvec1,clusvec2] = w0.*ones(rows(clusvec1),rows(clusvec2));
+                                                 M0[clusvec2,clusvec1] = w0.*ones(rows(clusvec2),rows(clusvec1));
+                                                 M1[clusvec1,clusvec2] = w1.*ones(rows(clusvec1),rows(clusvec2));
+                                                 M1[clusvec2,clusvec1] = w1.*ones(rows(clusvec2),rows(clusvec1));
+                                                 p0mat[clusvec1,clusvec2]
+                                                 = p0.*ones(rows(clusvec1),rows(clusvec2));
+                                                 p0mat[clusvec2,clusvec1]
+                                                 = p0.*ones(rows(clusvec2),rows(clusvec1));
+                                                 p1mat[clusvec1,clusvec2]
+                                                 = p1.*ones(rows(clusvec1),rows(clusvec2));
+                                                 p1mat[clusvec2,clusvec1]
+                                                 = p1.*ones(rows(clusvec2),rows(clusvec1));
+                                                 M0[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 M1[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 p0mat[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 p1mat[clusvec1,clusvec1] = zeros(rows(clusvec1),rows(clusvec1));
+                                                 
+                                                 endif;
+                                                 endo;
+                                                 else;
+                                                 c = ones(k,1);
+                                                 endif;
+                                                 endo;
+                                                 
+                                                 c1 = c;
+                                                 
+                                                 retp( c0 , c1 );
+                                                 endp;
+                                                 
+                                                 
+                                                 /*
+                                                 ** Procedure cointmat:
+                                                 **
+                                                 ** Purpose:
+                                                 ** Constructs matrix with cointegrating vectors for cluster.
+                                                 **
+                                                 ** Format:
+                                                 ** alfa = cointmat( k );
+                                                 **
+                                                 ** Input:
+                                                 ** k        scalar, number of series in cluster.
+                                                 **
+                                                 ** Output:
+                                                 ** alfa     (k-1xk)-matrix, with corresponding cointegrating vectors.
+                                                 */
+                                                 proc(1) = cointmat( k );
+                                                 
+                                                 local alfa ;
+                                                 
+                                                 alfa = zeros( k-1 , k );
+                                                 alfa[.,1:k-1] = alfa[.,1:k-1]+eye(k-1);
+                                                 alfa[.,2:k] = alfa[.,2:k]-eye(k-1);
+                                                 
+                                                 retp(alfa);
+                                                 endp;
+                                                 
+                                                 proc(1) = lagmat(x);
+                                                 
+                                                 local y;
+                                                 
+                                                 y = shiftr( x' , 1 , miss(0,0) );
+                                            y = y';
+                                            
+                                            retp(y);
+                                            endp;
+                                            
+                                            
+                                            /*
+                                            ** Procedure LocMin:
+                                            ** Gives row and column of minimum element in matrix
+                                            ** If minimum is not unique it returns the minimum element with the lowest
+                                            ** column and if this column contains 2 elements equal to the minimum it
+                                            ** returns the lowest row.
+                                            **
+                                            */
+                                            Proc(2) = LocMin( X );
+                                            
+                                            Local MinX , r , c ;
+                                            
+                                            MinX = MinC(MinC(X));
+                                            
+                                            c = IndNV( 1 , ( SumC( X.==MinX )./=0 ) );
+                                            r = IndNV( 1 , ( X[.,c].==MinX ) );
+                                            
+                                            RetP( r , c );
+                                            EndP;
+                                            
+                                            
+                                            /*
+                                            ** Procedure MVKPSS:
+                                            **
+                                            ** Purpose:
+                                            ** Calculates the multivariate KPSS-test.
+                                            **
+                                            ** Format:
+                                            ** { W0 , W1 } = MVKPSS( Y , l );
+                                            **
+                                            ** Input:
+                                            ** Y    (TxN)-matrix, containing series.
+                                            ** l    scalar, truncation parameter for Bartlett window.
+                                            **
+                                            ** Output:
+                                            ** W0   scalar, value of multivariate KPSS test for null hypothesis of zero
+                                            **          mean stationarity.
+                                            ** W1   scalar, value of multivariate KPSS test for null hypothesis of level
+                                            **          stationarity.
+                                            */
+                                            Proc(2) = MVKPSS( Y , l );
+                                            
+                                            local psi1,T,S,Sdemean,W0,W1,i,X,B,e;
+                                            
+                                            T = rows(Y);
+                                            
+                                            X = ones(T,1)~seqa(1,1,T);
+                                            B = Y/X;
+                                            e = Y-X*B;
+                                            
+                                            psi1 = NeweyWst( e , l );
+                                            psi1 = invpd(psi1);
+                                            
+                                            S = cumsumc(Y);
+                                            Sdemean = cumsumc( (Y-meanc(Y)') );
+
+W0 = 0;
+W1 = 0;
+
+i = 0;
+do while (i < T);
+i = i + 1;
+
+W0 = W0+S[i,.]*psi1*S[i,.]';
+W1 = W1+Sdemean[i,.]*psi1*Sdemean[i,.]';
+endo;
+
+W0 = W0./(T^2);
+W1 = W1./(T^2);
+
+retp( W0 , W1 );
+endp;
+
+
+/*
+  ** Procedure NeweyWst:
+  **
+  ** Purpose:
+  ** Estimates sample periodogram at frequency zero, using the estimator
+** introduced by Newey and West (1986,EMA).
+**
+  ** Format:
+  ** S = NeweyWst( Y , l );
+  **
+    ** Input:
+    ** Y    (TxN)-matrix, containing series.
+  ** l    scalar, truncation parameter for the Bartlett window.
+  **
+    ** Output:
+    ** S    (NxN)-matrix, containing estimated sample periodogram at freq. zero.
+  */
+    Proc(1) = NeweyWst( Y , l );
+    
+    local gami , T , S , i , Yl , kernel;
+    
+    T = rows(Y);
+    Y = (Y-meanc(Y)');
+         
+         S = (Y'*Y)./T;
+    Yl = Y;
+    kernel = Bartlett( T , l );
+    
+    i = 0;
+    do while ( i < l );
+    i = i+1;
+    
+    Yl = lagmat(Yl);
+    gami = (Y[i+1:rows(Y),.]'*Yl[i+1:rows(Yl),.])./T;
+            S = S+kernel[i+1].*(gami+gami');
+    endo;
+    
+    retp(S);
+    endp;
+    
+    
+    
+    /*
+      ** Procedure PValue:
+      **
+      ** Purpose:
+      ** Calculates the p-value of the multivariate KPSS test statistic.
+    **
+      ** Format:
+      ** { p0 , p1 } = pvalue( W0 , W1 , k , asymdis0 , asymdis1 );
+      **
+        ** Input:
+        ** W0       scalar, value of multivariate KPSS test for null hypothesis of zero
+      **              mean stationarity.
+      ** W1       scalar, value of multivariate KPSS test for null hypothesis of level
+      **              stationarity.
+      ** k        scalar, dimension of vector for which test values are determined.
+      ** asymdis0 (lx99)-matrix, containing the first 99 percentiles of the asymptotic
+      **              distribution of test for zero mean stationarity in each column.
+      **              The row number corresponds to the dimension of the test.
+      ** asymdis1 (lx99)-matrix, containing the first 99 percentiles of the asymptotic
+      **              distribution of test for zero mean stationarity in each column.
+      **              The row number corresponds to the dimension of the test.
+      **
+        ** Output:
+        ** p0       scalar, p-value associated with w0.
+      ** p1       scalar, p-value associated with w1.
+      **
+        */
+        proc(2) = pvalue( w0 , w1 , k , asymdis0 , asymdis1 );
+        
+        local l , yint , xint0 , xint1 , p0 , p1 , m0 , m1 , ind0 , ind1 ;
+        
+        _poldeg = 10 ;
+        
+        l = rows(asymdis0);
+        m0 = cols(asymdis0);
+        m1 = cols(asymdis1);
+        
+        if ( k < 0 ) or ( k > l );
+        Errorlog("Cannot determine p-value for test of this dimension");
+        end;
+        endif;
+        
+        xint0 = asymdis0[k,.]';
+        xint1 = asymdis1[k,.]';
+        
+        ind0  = indnv( 1 , (xint0.>w0) );
+        ind1  = indnv( 1 , (xint1.>w1) );
+        
+        if ( ind0 == 1 );
+        p0 = 0;
+        elseif ismiss( ind0 );
+        p0 = 1;
+        else;
+        p0 = (m0+1-ind0)./(m0+1);
+        p0 = p0+(1./(m0+1)).*((w0-xint0[m0-1])./(xint0[m0]-xint0[m0-1]));
+        endif;
+        
+        if ( ind1 == 1 );
+        p1 = 0;
+        elseif ismiss( ind1 );
+        p1 = 1;
+        else;
+        p1 = (m1+1-ind1)./(m1+1);
+        p1 = p1+(1./(m1+1)).*((w1-xint1[m1-1])./(xint1[m1]-xint1[m1-1]));
+        endif;
+        
+        p0 = 1 - p0;
+        p1 = 1 - p1;
+        
+        retp( p0 , p1 );
+        endp;
+        
+        
+        
+        /*
+          ** Program PWT:
+          **
+          ** Purpose:
+          ** Uses 1960-1989 RGDP per capita data for 112 countries from PWT and applies
+        ** clusteralgorithm from
+        ** 'Asymptotically Perfect and Relative Convergence of Productivity'
+        **                      Bart Hobijn and Philip Hans Franses
+        ** to it.
+        **
+          ** Notes:
+          ** 1. This program creates an ASCII file called PWT.OUT that contains the result
+        **    of the cluster procedure.
+        ** 2. This program has been test in GAUSS 3.2.1 for DOS. If you have any
+        **    problems running it, please send an email to Bart Hobijn at
+        **    hobijnb@fasecon.econ.nyu.edu
+        ** 3. You can adjust the bandwidth and critical p-value parameters to your own
+        **    liking.
+        */
+          
+          /*
+          ** Loading ascii dataset
+        */
+          /*
+          load d[31,113] = PWT.txt;
+          cntrs = d[1,2:113]';
+          d = d[2:31,2:113];
+          d = ln(d);
+          */
+          
+          load dms[2,1]= hfcodes/dims.csv;
+          tt=dms[1,1];
+          nn=dms[2,1];
+          load d[tt,nn]= hfcodes/datt.csv;
+          load cn[1,200]= hfcodes/cnames.txt;
+          cnt=cn[1:nn];
+          cntrs = cnt';
+          /*d = ln(d);*/
+            
+            
+            /*
+            ** In case you prefer to use the GAUSS dataset:
+            ** comment out the for lines above and remove the comments for the lines
+          ** below.
+          **
+            d = loadd("pwt");               @ loading Penn World Table data @
+              d = ln(d);
+            cntrs = getname("pwt");         @ loading Penn World Table headers @
+              */
+              
+              stopval = 0.1;                 @ Critical p-value for cluster-algorithm @
+                bandwidt = 4;                   @ bandwidth for Newey-west estimator @
+                
+                
+                @ Clusterprocedure @
+                @ C0 : Asymptotically perfectly converging clubs @
+                @ C1 : Asymptotically relatively converging clubs @
+                
+                { c0 , c1 } = cluster( d , bandwidt , stopval );
+                
+                @ Generating output file @
+                  output file=pwt.out reset;
+                  clusout( c0 , cntrs );
+                  "brkpnt";
+                  clusout(c1 , cntrs );
+                  
+                  output off;
+                  
+                  

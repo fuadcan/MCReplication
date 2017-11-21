@@ -1,0 +1,179 @@
+\documentclass{article}
+\begin{document}
+\begin{center}
+	\Large \bf Read Me 
+\end{center}
+The replication file consists the codes and helper files to replicate the Monte Carlo simulations for success of Maximal Clique and HF method. The codes can be decomposed to three steps; data generating, analyzing and evaluating. Outputs of the first two steps are files saved in disk and the last step are tables consist of evaluations.
+
+The codes are designed in R project version 3.11 and Gauss 10 for Windows and developed in Windows 7 64bit. To run the code trouble-free, the following requirements must be satisfied.
+\begin{flushleft}
+	\large Requirements
+\end{flushleft}
+\begin{enumerate}
+\item R project, Gauss for Windows
+\item Following packages for R: "igraph", "fUnitRoots", "stringr", "rugarch", "parallel"
+\item Gauss should be installed in directory C:/, not any subdirectory of C:/ (since the code utilizes Gauss by calling C:/gauss10/tgauss)
+
+\end{enumerate}
+
+\begin{flushleft}
+	\large Usage
+\end{flushleft}
+Run all the commands in main.R. The file contains commands used for data generating, analyzing and evaluating for both method and each data type. The results are saved in Results folder as csv file. NOTE: The tables in these files are re-formed for the paper but both shares same outline.
+
+\begin{flushleft}
+	\large Codes
+\end{flushleft}
+\begin{enumerate}
+	\item dataGen.R: The file contains two codes, dataGen, dataGenplus that generates single and multiple club data respectively.
+
+
+	 \textbf{dataGen:} Script for generating data involving single club \\
+	 
+	Inputs:
+		 \begin{itemize}
+		 	 
+		 	\item Tm: Time step (length) of the data,
+		 	\item n: Number of the countries included in data,
+		 	\item clubSize: Number of the club members,
+		 	\item frho: AR coefficient of the nonstationary factor's error terms,
+		 	\item trial: quantity of the data that will be produced,
+		 	\item noCons: TRUE if logGDP series is not wanted to contain intercept.
+		 \end{itemize}
+		 
+	Outputs: (Not returned but saved to hard disk.)
+		 
+		 \begin{itemize}
+		 \item  z: Matrix of n countries where clubsize of them are convergent,
+		 \item  ind: indice vector states which countries are converging,
+		 \item  gammas: vector of country factor loadings.  
+		 \end{itemize}
+
+		 \textbf{dataGenplus:} Script for generating data involving multiple clubs. \\
+
+	Inputs:
+	\begin{itemize}
+		
+		\item Tm: Time step (length) of the data,
+		\item n: Number of the countries included in data,
+		\item k: Number of clubs, 
+		\item frho: AR coefficient of the nonstationary factor's error terms,
+		\item trial: Quantity of the data that will be produced,
+		\item noCons: TRUE if logGDP series is not wanted to contain intercept.
+	\end{itemize}
+	
+	Outputs: (Not returned but saved to hard disk.)
+	
+	\begin{itemize}
+		\item  z: Matrix of n countries form k convergence clubs
+		\item  ind: Indice vector states which countries are converging,
+		\item  gammas:  Vector of country factor loadings.  
+	\end{itemize}		 
+	\item mcAGK.R: The file contains the script, mcAGK, that detects clubs of data containing \textit{single club} via maximal clique algorithm employing ADF, ADF-GLS and KPSS at 5\% significance level.
+	
+		Inputs:
+		\begin{itemize}
+			
+			\item Tm: Time step (length) of the data,
+			\item n: Number of the countries included in data,
+			\item clsize: Number of club members, 
+			\item frho: AR coefficient of the nonstationary factor's error terms,
+			\item noCons: TRUE if logGDP series doesn't contain intercept.
+		\end{itemize}
+		
+		Outputs: (Not returned but saved to hard disk.)
+		
+		\begin{itemize}
+		\item Report: Matrix containing values to evaluate success,
+		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+		\end{itemize}		 	
+		
+	\item mcHF.R: The file contains the script, mcHF, that detects both perfect and relative convergence clubs of data containing \textit{single club} via HF algorithm at 5\% significance level.
+	
+	Inputs:
+	\begin{itemize}
+		
+		\item Tm: Time step (length) of the data,
+		\item n: Number of the countries included in data,
+		\item clsize: Number of club members, 
+		\item frho: AR coefficient of the nonstationary factor's error terms,
+		\item noCons: TRUE if logGDP series doesn't contain intercept.
+	\end{itemize}
+	
+	Outputs: (Not returned but saved to hard disk.)
+	
+	\begin{itemize}
+		\item Report: Matrix containing values to evaluate success,
+		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+	\end{itemize}		 	
+	
+		\item mcAplus.R: The file contains the script, mcAplus, that detects clubs of data containing \textit{multiple clubs} via maximal clique algorithm employing ADF at 5\% significance level.
+		
+		Inputs:
+		\begin{itemize}
+			
+			\item Tm: Time step (length) of the data,
+			\item n: Number of the countries included in data,
+			\item k: Number of clubs, 
+			\item frho: AR coefficient of the nonstationary factor's error terms,
+			\item noCons: TRUE if logGDP series doesn't contain intercept.
+		\end{itemize}
+		
+		Outputs: (Not returned but saved to hard disk.)
+		
+		\begin{itemize}
+			\item Report: Matrix containing values to evaluate success,
+			\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+		\end{itemize}		 	
+	\begin{itemize}
+		\item Report: Matrix containing values to evaluate success,
+		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+	\end{itemize}		 	
+	
+	\item mcHFplus.R: The file contains the script, mcHFplus, that detects clubs of data containing \textit{multiple clubs} via HF algorithm at 5\% significance level.
+	
+	Inputs:
+	\begin{itemize}
+		
+		\item Tm: Time step (length) of the data,
+		\item n: Number of the countries included in data,
+		\item k: Number of clubs, 
+		\item frho: AR coefficient of the nonstationary factor's error terms,
+		\item noCons: TRUE if logGDP series doesn't contain intercept.
+	\end{itemize}
+	
+	Outputs: (Not returned but saved to hard disk.)
+	
+	\begin{itemize}
+		\item Report: Matrix containing values to evaluate success,
+		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+	\end{itemize}		 	
+	
+	\item anlysSingle.R: The file contains the code overallRep (with its helper functions) that evaluates single club results for both cases of intercept and for both methods.
+	
+	Inputs: (no input).\\
+	Outputs: Returns following evaluation tables (saved in Results Folder):
+	\begin{itemize}
+		\item KSrepNoConst: Table consisting Hit Rates, False Alarm Rates and Kupiers Scores for all data type and both method,
+		\item PTSnoConst: Table consisting Hit Rates, False Alarm Rates and Kupiers Scores for all data type and both method,
+		\item KSrepWithConst: Table consisting Hit Rates, False Alarm Rates and Kupiers Scores for all data type and both method,
+		\item PTSwithConst: Table consisting Hit Rates, False Alarm Rates and Kupiers Scores for all data type and both method.
+		
+	\end{itemize}
+	
+	\item anlysMulti.R: The file contains the code overallRepMulti (with its helper functions) that evaluates multiple club results for both cases of intercept and for both methods.
+	
+	Inputs: (no input).\\
+	Outputs: Table consisting Perfect Success results for all data type and both method. (Saved in Results Folder)
+	\item growthApplication.R: The file contains the script for applying HF method and maximal clique algorithm employing ADF to 5 different data (1930, 1940, Europe+G7, Europe+S\&P, G7+S\&P). 
+	Inputs: (no input).\\
+	Outputs: Returns following evaluation tables (saved in Results Folder):
+	\begin{itemize}
+		\item  ...............
+	\end{itemize}
+
+\end{enumerate}
+
+
+
+\end{document}

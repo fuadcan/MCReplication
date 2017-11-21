@@ -1,0 +1,209 @@
+
+Table 10: CD test statistics: T=100
+@@@@@@@@@@@@@@@@@@@ ADF( 0 ) @@@@@@@@@@@@@@@@@@@@
+tbar STATISTIC FOR IPS(P): CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   TBAR(P)            :  -2.067 
+   TBAR(P)*(truncated):  -2.039 
+*Truncation is done for ADF_i in such a way that
+when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).
+Appropriate E(TBAR) and Var(TBAR) are found in Table 3 of Im,Pesaran,Shin (2003).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ ADF( 1 ) @@@@@@@@@@@@@@@@@@@@
+tbar STATISTIC FOR IPS(P): CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   TBAR(P)            :  -1.789 
+   TBAR(P)*(truncated):  -1.789 
+*Truncation is done for ADF_i in such a way that
+when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).
+Appropriate E(TBAR) and Var(TBAR) are found in Table 3 of Im,Pesaran,Shin (2003).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ ADF( 2 ) @@@@@@@@@@@@@@@@@@@@
+tbar STATISTIC FOR IPS(P): CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   TBAR(P)            :  -1.699 
+   TBAR(P)*(truncated):  -1.699 
+*Truncation is done for ADF_i in such a way that
+when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).
+Appropriate E(TBAR) and Var(TBAR) are found in Table 3 of Im,Pesaran,Shin (2003).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ ADF( 3 ) @@@@@@@@@@@@@@@@@@@@
+tbar STATISTIC FOR IPS(P): CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   TBAR(P)            :  -1.933 
+   TBAR(P)*(truncated):  -1.933 
+*Truncation is done for ADF_i in such a way that
+when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).
+Appropriate E(TBAR) and Var(TBAR) are found in Table 3 of Im,Pesaran,Shin (2003).
+-------------------------------------------------------
+
+
+*****************************************************
+ADF_i(p) Statistics: Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -1.914   -1.663   -1.455   -1.920 
+       2   -1.563   -1.522   -1.552   -1.810 
+       3   -3.078   -2.385   -1.797   -1.755 
+       4   -2.948   -2.494   -2.388   -1.939 
+       5   -1.858   -1.842   -1.663   -1.703 
+       6   -1.543   -1.449   -1.481   -1.887 
+       7   -1.533   -1.508   -1.542   -1.914 
+       8   -1.662   -1.596   -1.454   -1.786 
+       9   -2.204   -1.822   -1.734   -1.849 
+      10   -1.533   -1.525   -1.483   -1.809 
+      11   -1.807   -1.635   -1.453   -1.748 
+      12   -1.533   -1.497   -1.543   -1.896 
+      13   -6.753   -4.123   -3.729   -3.595 
+      14   -1.501   -1.468   -1.522   -1.888 
+      15   -1.536   -1.515   -1.518   -1.860 
+      16   -1.529   -1.494   -1.526   -1.935 
+      17   -1.529   -1.502   -1.536   -1.918 
+      18   -1.540   -1.495   -1.528   -1.874 
+      19   -1.541   -1.502   -1.526   -1.909 
+      20   -2.232   -1.746   -1.543   -1.663 
+
+*****************************************************
+ADF*_i(p) Statistics (truncated): Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -1.914   -1.663   -1.455   -1.920 
+       2   -1.563   -1.522   -1.552   -1.810 
+       3   -3.078   -2.385   -1.797   -1.755 
+       4   -2.948   -2.494   -2.388   -1.939 
+       5   -1.858   -1.842   -1.663   -1.703 
+       6   -1.543   -1.449   -1.481   -1.887 
+       7   -1.533   -1.508   -1.542   -1.914 
+       8   -1.662   -1.596   -1.454   -1.786 
+       9   -2.204   -1.822   -1.734   -1.849 
+      10   -1.533   -1.525   -1.483   -1.809 
+      11   -1.807   -1.635   -1.453   -1.748 
+      12   -1.533   -1.497   -1.543   -1.896 
+      13   -6.190   -4.123   -3.729   -3.595 
+      14   -1.501   -1.468   -1.522   -1.888 
+      15   -1.536   -1.515   -1.518   -1.860 
+      16   -1.529   -1.494   -1.526   -1.935 
+      17   -1.529   -1.502   -1.536   -1.918 
+      18   -1.540   -1.495   -1.528   -1.874 
+      19   -1.541   -1.502   -1.526   -1.909 
+      20   -2.232   -1.746   -1.543   -1.663 
+*Truncation is done for ADF_i in such a way that
+when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+p= 0.00 :96.23 
+p= 1.00 :96.14 
+p= 2.00 :96.07 
+p= 3.00 :94.29 
+
+----------------------------------------
+Table 11: CIPS test statistics: T=100
+@@@@@@@@@@@@@@@@@@@ CADF( 0 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   CIPS            :  -6.842 
+   CIPS*(truncated):  -5.962 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 1 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   CIPS            :  -5.549 
+   CIPS*(truncated):  -5.393 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 2 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   CIPS            :  -4.727 
+   CIPS*(truncated):  -4.721 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 3 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   20 , T=   96 , (  100 data points used)
+   CIPS            :  -4.244 
+   CIPS*(truncated):  -4.233 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+
+*****************************************************
+CADF_i(p) Statistics: Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -6.418   -5.889   -4.574   -5.399 
+       2   -7.908   -5.853   -4.855   -4.664 
+       3   -5.732   -4.703   -3.752   -3.272 
+       4   -6.381   -4.835   -4.497   -3.034 
+       5   -5.764   -5.153   -4.461   -3.721 
+       6   -8.731   -7.023   -5.562   -4.932 
+       7   -5.982   -5.137   -3.451   -3.068 
+       8   -8.526   -6.934   -5.288   -4.258 
+       9   -6.905   -5.022   -5.438   -4.333 
+      10   -6.058   -5.992   -4.689   -4.241 
+      11   -4.951   -4.649   -3.827   -3.973 
+      12   -5.437   -4.593   -3.902   -3.684 
+      13   -9.229   -6.035   -6.116   -6.422 
+      14   -7.217   -5.554   -5.418   -5.046 
+      15   -7.592   -6.790   -6.316   -5.599 
+      16   -5.978   -4.719   -3.838   -3.706 
+      17   -5.639   -4.761   -4.229   -3.925 
+      18   -9.197   -6.910   -5.613   -4.234 
+      19   -5.618   -4.013   -3.080   -3.090 
+      20   -7.570   -6.423   -5.635   -4.287 
+
+Appropriate critical values are in Table 1, Pesaran (2006).
+*****************************************************
+CADF*_i(p) Statistics (truncated): Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -6.190   -5.889   -4.574   -5.399 
+       2   -6.190   -5.853   -4.855   -4.664 
+       3   -5.732   -4.703   -3.752   -3.272 
+       4   -6.190   -4.835   -4.497   -3.034 
+       5   -5.764   -5.153   -4.461   -3.721 
+       6   -6.190   -6.190   -5.562   -4.932 
+       7   -5.982   -5.137   -3.451   -3.068 
+       8   -6.190   -6.190   -5.288   -4.258 
+       9   -6.190   -5.022   -5.438   -4.333 
+      10   -6.058   -5.992   -4.689   -4.241 
+      11   -4.951   -4.649   -3.827   -3.973 
+      12   -5.437   -4.593   -3.902   -3.684 
+      13   -6.190   -6.035   -6.116   -6.190 
+      14   -6.190   -5.554   -5.418   -5.046 
+      15   -6.190   -6.190   -6.190   -5.599 
+      16   -5.978   -4.719   -3.838   -3.706 
+      17   -5.639   -4.761   -4.229   -3.925 
+      18   -6.190   -6.190   -5.613   -4.234 
+      19   -5.618   -4.013   -3.080   -3.090 
+      20   -6.190   -6.190   -5.635   -4.287 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 1, Pesaran (2006).

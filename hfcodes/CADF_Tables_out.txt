@@ -1,0 +1,127 @@
+Table 10: CD test statistics: T=100
+p= 0.00 :70.01 
+p= 1.00 :69.86 
+p= 2.00 :69.74 
+p= 3.00 :68.30 
+
+----------------------------------------
+Table 11: CIPS test statistics: T=100
+@@@@@@@@@@@@@@@@@@@ CADF( 0 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   17 , T=  100 , (  104 data points used)
+   CIPS            :  -1.694 
+   CIPS*(truncated):  -1.694 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 1 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   17 , T=  100 , (  104 data points used)
+   CIPS            :  -2.072 
+   CIPS*(truncated):  -2.072 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 2 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   17 , T=  100 , (  104 data points used)
+   CIPS            :  -1.961 
+   CIPS*(truncated):  -1.961 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+@@@@@@@@@@@@@@@@@@@ CADF( 3 ) @@@@@@@@@@@@@@@@@@@@
+CIPS TEST: CASE 2 , WITH INTERCEPT
+N=   17 , T=  100 , (  104 data points used)
+   CIPS            :  -2.154 
+   CIPS*(truncated):  -2.154 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 2, Pesaran (2006).
+-------------------------------------------------------
+
+
+*****************************************************
+CADF_i(p) Statistics: Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -1.613   -1.794   -1.672   -1.767 
+       2   -2.884   -3.121   -3.612   -4.005 
+       3   -1.091   -1.225   -1.392   -1.595 
+       4   -0.991   -1.337   -1.132   -1.246 
+       5    0.576   -0.234   -0.399   -0.983 
+       6   -1.635   -1.973   -1.701   -1.563 
+       7   -1.842   -2.454   -2.462   -2.729 
+       8   -2.524   -3.236   -2.974   -3.264 
+       9   -2.051   -2.164   -2.269   -2.755 
+      10   -1.869   -2.513   -2.168   -2.433 
+      11   -1.486   -1.796   -1.649   -1.724 
+      12   -1.628   -1.804   -1.757   -1.953 
+      13   -2.067   -2.567   -1.914   -1.959 
+      14   -2.585   -2.729   -2.489   -2.613 
+      15   -1.560   -1.728   -1.604   -1.662 
+      16   -2.368   -2.561   -2.426   -2.511 
+      17   -1.188   -1.984   -1.722   -1.863 
+
+Appropriate critical values are in Table 1, Pesaran (2006).
+*****************************************************
+CADF*_i(p) Statistics (truncated): Case 2 , WITH INTERCEPT
+
+    id/p        0        1        2        3 
+       1   -1.613   -1.794   -1.672   -1.767 
+       2   -2.884   -3.121   -3.612   -4.005 
+       3   -1.091   -1.225   -1.392   -1.595 
+       4   -0.991   -1.337   -1.132   -1.246 
+       5    0.576   -0.234   -0.399   -0.983 
+       6   -1.635   -1.973   -1.701   -1.563 
+       7   -1.842   -2.454   -2.462   -2.729 
+       8   -2.524   -3.236   -2.974   -3.264 
+       9   -2.051   -2.164   -2.269   -2.755 
+      10   -1.869   -2.513   -2.168   -2.433 
+      11   -1.486   -1.796   -1.649   -1.724 
+      12   -1.628   -1.804   -1.757   -1.953 
+      13   -2.067   -2.567   -1.914   -1.959 
+      14   -2.585   -2.729   -2.489   -2.613 
+      15   -1.560   -1.728   -1.604   -1.662 
+      16   -2.368   -2.561   -2.426   -2.511 
+      17   -1.188   -1.984   -1.722   -1.863 
+* Truncation is done for CADF_i in such a way that
+when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,
+where k1=-6.19  and k2=2.61 .
+Appropriate critical values are in Table 1, Pesaran (2006).
+
+----------------------------------------
+Table 14: Moon and Perron test statistics: T=103,k=1
+
+MOON and PERRON (2004) PANEL UNIT ROOT TEST RESULTS
+In the case without trend
+
+N=  17 
+Number of data points used: 104 (T =  103 )
+Given number of factors:   1 
+
+tstar_a    -0.047 
+tstar_b    -0.407 
+------------------------------------------------
+Change of 17 OCED real exchange rate, T=103
+Estimated number of factors 
+by using information criteria proposed by Bai and Ng (2002)
+
+    maxk:           1          4          6 
+       ---        ---        ---        --- 
+       PC1          1          4          6 
+       PC2          1          4          6 
+       PC3          1          4          6 
+       IC1          1          4          6 
+       IC2          1          4          6 
+       IC3          1          4          6 

@@ -1,0 +1,953 @@
+/**
+@@ THIS PROGRAM COMPUTE SOME STATISTICS OF TABLE 10,11,14 and more OF PESARAN, 	@@
+@@ " A SIMPLE PANEL UNIT ROOT TEST UNDER CROSS SECTION DEPENDENCE"     		    @@
+@@  FEBRUARY 2006                                                      		    @@
+@@  								       		                                @@
+@@  IT IS NECESSARY TO MODIFY DIRECTORY OF EXCEL FILE                           @@
+@@   "real_exchange_7398.xls",                                                  @@         
+@@  IN THE FIRST LINE OF THE PROGRAM.                                           @@
+@@                                                                              @@
+@@  ALSO A SIMPLE CODE TO COMPUTE CD TEST STATISTIC IS FOUND AT THE             @@
+@@  END OF THIS FILE. THIS IS ONLY FOR BALANCED PANEL DATA, AND                 @@
+@@  REQUIRE RESIDUALS AS INPUTS.                                                @@
+@@                                                                              @@
+@@  It would be appreciated if one could acknowledge the use of code            @@
+@@  in his/er research.                                                         @@
+@@                                                                              @@
+@@    Takashi Yamagata 13 March 06                                              @@
+**/
+
+/***********************************************************************/
+/** Loading the data, Please change the directory of excel data file **/
+/***********************************************************************/
+
+/*rer100=xlsreadm("F:\\DAE\\TY228\\Gauss6.0\\0myproc\\CADFgauss6\\real_exchange_7398.xls","b2:r105",1,"");*/
+/*rer44=xlsreadm("F:\\DAE\\TY228\\Gauss6.0\\0myproc\\CADFgauss6\\real_exchange_7398.xls","b58:r105",1,"");*/
+
+file_name = "real_exchange_7398.xls";
+cell_range = "b2:r105";
+sheet_num = 1;
+vls = "";
+
+rer100 = xlsReadM(file_name, cell_range, sheet_num, vls);
+
+/*rer100=xlsreadm("real_exchange_7398.xls","b2:r105",1,"")*/
+
+maxp=3;case=2;var_mat=rer100;
+t=rows(rer100)-maxp-1;n=cols(rer100);
+OUTPUT FILE="nanay.txt" ON;
+/***********************************************************************/
+/** Reproduce Left Panel of Table 10 of Pesaran (2006) **/
+/***********************************************************************/
+"";
+"Table 10: CD test statistics: T=100";
+
+/* firstly obtain residuals of ADF(p) regressions */
+/* which is "d" below. See top of IPSmarch06.prc file */
+/* for details in using this procedure                */
+{a,b,c,d}=ips(var_mat,maxp,case);
+
+/* compute CD test statistics for each p */
+i=1;
+do while i<=maxp+1;
+    res_p_mat=d[1+(i-1)*t:(i)*t,.];
+    {cd_p,lm_p}=cdlm(res_p_mat);
+    format /rd 5,2;
+    "p=";;i-1;;":";;cd_p;
+    i=i+1;
+endo;
+
+/***********************************************************************/
+/** Reproduce Left Panel of Table 11 of Pesaran (2006) **/
+/***********************************************************************/
+"";    
+"----------------------------------------";
+"Table 11: CIPS test statistics: T=100";
+/* See top of CIPSmarch06.prc file */
+/* for details in using this procedure */
+{a2,b2,c2,d2}=cips(var_mat,maxp,case);
+
+/***********************************************************************/
+/** Reproduce Top Left Figures of Table 14 of Pesaran (2006) **/
+/***********************************************************************/
+k=1;
+"";    
+"----------------------------------------";
+"Table 14: Moon and Perron test statistics: T=103,k=1";
+/* See top of PU_MP04.prc file */
+/* for details in using this procedure */
+{tstarab}=PU_MP04(var_mat,k,case);
+
+kset={1,4,6};
+
+/***********************************************************************/
+/* Bai and Ng (2002) Procedure to Estimate the Number of Factors */
+/**********************************************************************/
+/* See top of BaiNg02.prc file */
+/* for details in using this procedure */
+d_data=rer100-lag(rer100);
+xmat=d_data[2:rows(d_data),.];
+
+/*******/
+result={};
+i=1;
+do while i<=rows(kset);
+kmax=kset[i];
+{nb,icmat}=bai02(xmat,kmax);
+result=result~nb;
+i=i+1;
+endo;
+"Change of 17 OCED real exchange rate, T=103";
+"Estimated number of factors ";
+"by using information criteria proposed by Bai and Ng (2002)";
+top="maxk: "~ftocv(kset',1,0);
+top2={"---","---","---","---"};
+top=top|top2';
+icname={"PC1","PC2","PC3","IC1","IC2","IC3"};
+$ top|(icname~ftocv(result,1,0));
+
+format /rd 10,7;
+
+/************************************************************************/
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/* 			procedures follows				*/
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/************************************************************************/
+
+OUTPUT FILE="nanay.txt" OFF;
+
+
+
+/*************************************************************************/
+/* THIS VERSION: 13/03/06                                               **/
+/* COMPUTE CIPS(P) AND CIPS*(P) STATISTICS IN M.H.PESARAN               **/
+/* " A SIMPLE PANEL UNIT ROOT TEST UNDER CROSS SECTION DEPENDENCE"      **/
+/*  FEBRUARY 2006                                                       **/
+/* NOTE:                                                                **/
+/* Please report any problems you might have, to: ty228@cam.ac.uk       **/
+/*                                                                      **/
+/* {CIPSmat,cadf_p_mat,cadfs_p_mat,res_p_mat}=cips(var_mat,maxp,case)   **/
+/* <<INPUTS>>                                                           **/
+/* var_mat (T x N) matrix                                               **/
+/* N            : number of cross section dimension                     **/
+/* T		: number of observations for i's                            **/
+/* maxp (more than or equal to zero) : maximum number of (ADF) lag order**/
+/*                                    eg. maxp=0: CADF==CDF             **/
+/* case=1: no intercept nor trend                                       **/
+/* case=2: with intercept                                               **/
+/* case=3: with intercept and trend                                     **/
+/* <<OUTPUTS>>                                                          **/
+/* CIPSmat: (maxp+1) x 2 matrix, first column reports                   **/
+/*          CIPS(p) and second column reports CIPS*(p)                  **/
+/*          for p=0,1,...,maxp in ascending order                       **/
+/*     -CIPS(p) statistic is defined as simple average of               **/
+/*       CADF(p)_i statistics                                           **/
+/*     -CIPS*(p) statistic is defined as simple average of              **/
+/*       CADF*(p)_i statistics, which is truncated version of CADF_i.   **/   
+/*                                                                      **/   
+/* cadf_p_mat: a N x (maxp+1) matrix, reports all CADF(p)_i statistics  **/   
+/* cadfs_p_mat: a N x (maxp+1) matrix, reports all CADF*(p)_i statistics**/
+/* res_p_mat: a (maxp+1) set of						                    **/ 
+/*		T-(maxp+1) x N matrix of residuals of CADF(p)_i regressions	    **/
+/*              concatenated vertically, from the top p=0,p=1,,,p=maxp  **/    
+/*                                                                      **/   
+/* NB: Appropriate critical values for CIPS statistic are found         **/
+/*  are in Table 2 in Pesaran (2006)                                    **/    
+/*                                                                      **/
+/* NOTEs: Default setting is to print the results. It can be            **/
+/*       suppressed by choosing "outpt=0" below (7th-line of the code   **/
+/* Takashi Yamagata, 13 March2006                                       **/
+/*                                                                      **/
+/*************************************************************************/
+proc(4)=cips(var_mat,maxp,case);
+local outpt,n,t,tlag,var_mat_1,Dvar_mat_temp,Dvar_mat,Dvar_CSM,var_1_CSM;
+local tt,y,z,hi,x,h,k1,k2,bvec,sevec,t_vec_cce,t_bar,i,c_p,temp;
+local trncl,truncu,trnc1,cadf_p,cadf_ps,cips_p_mat,cips_p,cips_ps;
+local cadf_p_mat,cadfs_p_mat,idvec,lgorder,res_p_mat,res_p;
+
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outpt=1;/* 1: reports ourput, 0:supress the output */
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outwidth 256;
+
+t=rows(var_mat);
+n=cols(var_mat);
+tlag=maxp+1;
+
+var_mat_1=lag(var_mat);
+Dvar_mat_temp=var_mat-var_mat_1;
+    var_mat_1=var_mat_1[tlag+1:t,.];
+    Dvar_mat=Dvar_mat_temp[tlag+1:t,.];
+
+Dvar_CSM=meanc(Dvar_mat');
+var_1_CSM=meanc(var_mat_1');
+
+tt=t-tlag;
+
+/*************/
+y=vec(Dvar_mat);
+Hi=Dvar_CSM~var_1_CSM;
+x=vec(var_mat_1);
+
+/****/
+if case==1;k1=-6.12;k2=4.16;
+elseif case==2;Z=ones(n*tt,1);k1=-6.19;k2=2.61;
+elseif case==3;Z=ones(n*tt,1)~(ONES(N,1).*.seqa(1,1,tt));k1=-6.42;k2=1.70;
+else;"please choose the 'case' only from 1,2, or 3";end;
+endif;
+
+/**************** ESTIMATION ****************/
+c_p=0;
+cips_p_mat={};
+cadf_p_mat={};
+cadfs_p_mat={};
+res_p_mat={};
+do while c_p<=maxp;
+
+if c_p>0;
+    temp=(Dvar_mat_temp[tlag+1-c_p:t-c_p,.]);
+    Hi=Hi~meanc(temp'); 
+    x=x~vec(temp);
+endif;
+
+/*************/
+if case==1;H=(ONES(N,1).*.Hi);
+else;H=Z~(ONES(N,1).*.Hi);
+endif;
+
+/*** MGCCE ****/
+{bvec,sevec,t_vec_cce,res_p}=mgsimple(y,x~h,n,tt);
+
+trncl=k1*(t_vec_cce[.,1].<k1);truncu=k2*(t_vec_cce[.,1].>k2);
+trnc1=(t_vec_cce[.,1].>k1).*(t_vec_cce[.,1].<k2);
+
+cadf_p = t_vec_cce[.,1];
+cadf_ps = (t_vec_cce[.,1].*trnc1+trncl+truncu);
+
+cips_p=meanc(cadf_p);
+cips_ps=meanc(cadf_ps);
+
+if outpt==1;
+format /rd 2,0;
+"@@@@@@@@@@@@@@@@@@@ CADF(";;C_P;;") @@@@@@@@@@@@@@@@@@@@";
+format /rd 2,0;
+"CIPS TEST: CASE";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT AND TREND";
+endif;
+format /rd 5,0;
+"N=";;n;;", T=";;tt;;", (";;t;;"data points used)";
+format /rd 8,3;
+"   CIPS            :";;cips_p;
+"   CIPS*(truncated):";;cips_ps;
+"* Truncation is done for CADF_i in such a way that" ;
+format /rd 1,2;
+"when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,";
+"where ";;"k1=";;k1;;" and k2=";;k2;;".";
+"Appropriate critical values are in Table 2, Pesaran (2006).";
+"-------------------------------------------------------";
+"";
+endif;
+cips_p_mat=cips_p_mat|(cips_p~cips_ps);
+cadf_p_mat=cadf_p_mat~cadf_p;
+cadfs_p_mat=cadfs_p_mat~cadf_ps;
+
+res_p_mat=res_p_mat|res_p;
+
+    c_p=c_p+1;
+endo;
+
+if outpt==1;
+format /rd 8,0;
+idvec=ftocv(seqa(1,1,n),1,0);
+lgorder="id/p"~ftocv(seqa(0,1,maxp+1)',1,0);
+
+format /rd 2,0;
+"";
+"*****************************************************";
+"CADF_i(p) Statistics: Case";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT AND TREND";
+endif;
+format /rd 8,0;
+$ (lgorder|(idvec~ftocv(cadf_p_mat,1,3)));
+"";
+"Appropriate critical values are in Table 1, Pesaran (2006).";
+"*****************************************************";
+format /rd 2,0;
+"CADF*_i(p) Statistics (truncated): Case";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT and TREND";
+endif;
+format /rd 8,0;
+$ (lgorder|(idvec~ftocv(cadfs_p_mat,1,3)));
+"* Truncation is done for CADF_i in such a way that" ;
+format /rd 1,2;
+"when CADF_i<k1, CADF_i=k1 and when CADF_i>k2, CADF_i=k2,";
+"where ";;"k1=";;k1;;" and k2=";;k2;;".";
+"Appropriate critical values are in Table 1, Pesaran (2006).";
+endif;
+
+format /rd 16,8;
+retp(cips_p_mat,cadf_p_mat,cadfs_p_mat,res_p_mat);
+endp;
+
+/*** OLS regression for each cross section unit ****/
+proc(4)=mgsimple(y,x,n,t);
+local bvec,sevec,tvec,i,y_i,x_i,beta_i,e_i,zig2,se_i,t_i,res_mat;
+bvec=zeros(n,cols(x));
+sevec=zeros(n,cols(x));
+tvec=zeros(n,cols(x));
+res_mat={};
+i=1;
+do while i<=n;
+    y_i=y[1+(i-1)*t:(i)*t,.];
+    x_i=x[1+(i-1)*t:(i)*t,.];
+    beta_i=y_i/x_i;
+    e_i=y_i-x_i*beta_i;
+    zig2=e_i'e_i/(T-cols(x));
+    se_i=sqrt(diag(zig2*invpd(x_i'x_i)));
+    t_i=beta_i./se_i;
+
+    bvec[i,.]=beta_i';
+    sevec[i,.]=se_i';
+    tvec[i,.]=t_i';
+    res_mat=res_mat~e_i;
+
+i=i+1;
+endo;
+
+retp(bvec,sevec,tvec,res_mat);
+endp;
+/*************************************************************************/
+/* THIS VERSION: 13/03/06                                               **/
+/* COMPUTE tbar(P) (AND tbar*(P)) STATISTICS IN IM, PESARAN, SHIN (2003)**/
+/* "Testing for unit roots in heterogeneous panels", Journal of         **/
+/*  Econometrics 115, 53-74.                                            **/
+/* For the truncated version, see Pesaran (2006),                       **/
+/* " A SIMPLE PANEL UNIT ROOT TEST UNDER CROSS SECTION DEPENDENCE"      **/
+/*  FEBRUARY 2006                                                       **/
+/* NOTE:                                                                **/
+/* Please report any problems you might have, to: ty228@econ.cam.ac.uk  **/
+/*                                                                      **/
+/* {tbarmat,adf_p_mat,adfs_p_mat,res_p_mat}=ips(var_mat,maxp,case);     **/
+/*                                                                      **/
+/* <<INPUTS>>                                                           **/
+/* var_mat (T x N) matrix                                               **/
+/* N            : number of cross section dimension                     **/
+/* T		: number of observations for i's                            **/
+/* maxp (more than or equal to zero) : maximum number of (ADF) lag order**/
+/*                                    eg. maxp=0: ADF==DF               **/
+/* case=1: no intercept nor trend                                       **/
+/* case=2: with intercept                                               **/
+/* case=3: with intercept and trend                                     **/
+/* <<OUTPUTS>>                                                          **/
+/* tbarmat: (maxp+1) x 2 matrix, first column reports                   **/
+/*          tbar(p) and second column reports tbar*(p)                  **/
+/*          for p=0,1,...,maxp in ascending order                       **/
+/*     -tbar(p) statistic is defined as simple average of               **/
+/*       adf(p)_i statistics                                            **/
+/*     -tbar*(p) statistic is defined as simple average of              **/
+/*       adf*(p)_i statistics, which is truncated version of adf(p)_i.  **/
+/*    Notes: For a discussion about the truncation, See Pesaran (2006), **/
+/*      " A Simple Panel Unit Root Test Under Cross Section Dependence" **/
+/*                                                                      **/   
+/* adf_p_mat: a N x (maxp+1) matrix, reports all ADF(p)_i statistics    **/   
+/* adfs_p_mat: a N x (maxp+1) matrix, reports all ADF*(p)_i statistics  **/   
+/* res_p_mat: a (maxp+1) set of						                    **/ 
+/*		T-(maxp+1) x N matrix of residuals of  ADF(p)_i regressions	    **/
+/*              concatenated vertically, from the top p=0,p=1,,,p=maxp  **/    
+/*                                                                      **/   
+/* IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).                     **/
+/* Appropriate E(TBAR) and Var(TBAR) are found in                       **/
+/* Table 3 of Im,Pesaran,Shin (2003)                                    **/
+/* NOTEs: Default setting is to print the results. It can be            **/
+/*       suppressed by choosing "outpt=0" below (7th-line of the code   **/
+/* Takashi Yamagata, 13 March 2006                                        **/
+/*                                                                      **/
+/*************************************************************************/
+proc(4)=ips(var_mat,maxp,case);
+local outpt,n,t,tlag,var_mat_1,Dvar_mat_temp,Dvar_mat;
+local tt,y,z,x,xx,k1,k2,bvec,sevec,t_vec,t_bar,i,c_p,temp;
+local trncl,truncu,trnc1,adf_p,adf_ps,tbar_p_mat,tbar_p,tbar_ps;
+local adf_p_mat,adfs_p_mat,idvec,lgorder,res_p_mat,res_p;
+
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outpt=0;/* 1: reports ourput, 0:supress the output */
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outwidth 256;
+
+t=rows(var_mat);
+n=cols(var_mat);
+tlag=maxp+1;
+
+var_mat_1=lag(var_mat);
+Dvar_mat_temp=var_mat-var_mat_1;
+    var_mat_1=var_mat_1[tlag+1:t,.];
+    Dvar_mat=Dvar_mat_temp[tlag+1:t,.];
+
+tt=t-tlag;
+
+/*************/
+y=vec(Dvar_mat);
+x=vec(var_mat_1);
+
+/****/
+if case==1;k1=-6.12;k2=4.16;
+elseif case==2;Z=ones(n*tt,1);k1=-6.19;k2=2.61;
+elseif case==3;Z=ones(n*tt,1)~(ONES(N,1).*.seqa(1,1,tt));k1=-6.42;k2=1.70;
+else;"please choose the 'case' only from 1,2, or 3";end;
+endif;
+
+/**************** ESTIMATION ****************/
+c_p=0;
+tbar_p_mat={};
+adf_p_mat={};
+adfs_p_mat={};
+res_p_mat={};
+do while c_p<=maxp;
+
+if c_p>0;
+    temp=(Dvar_mat_temp[tlag+1-c_p:t-c_p,.]);
+    x=x~vec(temp);
+endif;
+
+/*************/
+if case==1;xx=x;
+else;xx=x~Z;
+endif;
+
+/*** MGCCE ****/
+{bvec,sevec,t_vec,res_p}=mgsimple(y,xx,n,tt);
+
+trncl=k1*(t_vec[.,1].<k1);truncu=k2*(t_vec[.,1].>k2);
+trnc1=(t_vec[.,1].>k1).*(t_vec[.,1].<k2);
+
+adf_p = t_vec[.,1];
+adf_ps = (t_vec[.,1].*trnc1+trncl+truncu);
+
+tbar_p=meanc(adf_p);
+tbar_ps=meanc(adf_ps);
+
+if outpt==1;
+format /rd 2,0;
+"@@@@@@@@@@@@@@@@@@@ ADF(";;C_P;;") @@@@@@@@@@@@@@@@@@@@";
+format /rd 2,0;
+"tbar STATISTIC FOR IPS(P): CASE";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT AND TREND";
+endif;
+format /rd 5,0;
+"N=";;n;;", T=";;tt;;", (";;t;;"data points used)";
+format /rd 8,3;
+"   TBAR(P)            :";;tbar_p;
+"   TBAR(P)*(truncated):";;tbar_ps;
+format /rd 1,2;
+"*Truncation is done for ADF_i in such a way that";
+"when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,";
+"where ";;"k1=";;k1;;" and k2=";;k2;;".";
+"IPS is sqrt(N)*(TBAR - E(TBAR))/sqrt(Var(TBAR)).";
+"Appropriate E(TBAR) and Var(TBAR) are found in Table 3 of Im,Pesaran,Shin (2003).";
+"-------------------------------------------------------";
+"";
+endif;
+tbar_p_mat=tbar_p_mat|(tbar_p~tbar_ps);
+adf_p_mat=adf_p_mat~adf_p;
+adfs_p_mat=adfs_p_mat~adf_ps;
+res_p_mat=res_p_mat|res_p;
+
+    c_p=c_p+1;
+endo;
+
+if outpt==1;
+format /rd 8,0;
+idvec=ftocv(seqa(1,1,n),1,0);
+lgorder="id/p"~ftocv(seqa(0,1,maxp+1)',1,0);
+
+format /rd 2,0;
+"";
+"*****************************************************";
+"ADF_i(p) Statistics: Case";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT AND TREND";
+endif;
+format /rd 8,0;
+$ (lgorder|(idvec~ftocv(adf_p_mat,1,3)));
+"";
+"*****************************************************";
+format /rd 2,0;
+"ADF*_i(p) Statistics (truncated): Case";;case;;
+if case==1;", NO INTERCEPT";
+elseif case==2;", WITH INTERCEPT";
+elseif case==3;", WITH INTERCEPT and TREND";
+endif;
+format /rd 8,0;
+$ (lgorder|(idvec~ftocv(adfs_p_mat,1,3)));
+format /rd 1,2;
+"*Truncation is done for ADF_i in such a way that";
+"when ADF_i<k1, ADF_i=k1 and when ADF_i>k2, ADF_i=k2,";
+"where ";;"k1=";;k1;;" and k2=";;k2;;".";
+endif;
+
+format /rd 16,8;
+retp(tbar_p_mat,adf_p_mat,adfs_p_mat,res_p_mat);
+endp;
+
+/*** OLS regression for each cross section unit ****/
+proc(4)=mgsimple(y,x,n,t);
+local bvec,sevec,tvec,i,y_i,x_i,beta_i,e_i,zig2,se_i,t_i,res_mat;
+bvec=zeros(n,cols(x));
+sevec=zeros(n,cols(x));
+tvec=zeros(n,cols(x));
+res_mat={};
+i=1;
+do while i<=n;
+    y_i=y[1+(i-1)*t:(i)*t,.];
+    x_i=x[1+(i-1)*t:(i)*t,.];
+    beta_i=y_i/x_i;
+    e_i=y_i-x_i*beta_i;
+    zig2=e_i'e_i/(T-cols(x));
+    se_i=sqrt(diag(zig2*invpd(x_i'x_i)));
+    t_i=beta_i./se_i;
+
+    bvec[i,.]=beta_i';
+    sevec[i,.]=se_i';
+    tvec[i,.]=t_i';
+    res_mat=res_mat~e_i;
+
+i=i+1;
+endo;
+
+retp(bvec,sevec,tvec,res_mat);
+endp;
+/********************************************************************/
+/* This is a gauss procedure to compute Moon and Perron (2004),     */
+/* "TESTING FOR A UNIT ROOT IN PANELS WITH DYNAMIC FACTORS",        */
+/* Journal of Econometrics 122, 81-126.                             */
+/*                                                                  */
+/* This code is heavily based on the Matlab code by                 */
+/* Moon & Perron 2004, last updated June 25 2004.                   */
+/*								                                    */
+/* {testvec}=PU_MP04(y,m,case);	                                    */
+/*                                                                  */
+/*  <<INPUT>>                                                       */
+/*  y: (T+1 x N) matrix                                             */
+/*  m: number of factors (estimated beforehand or known)            */
+/*  case:  1 or 2: fixed effects no trend, or 3: deterministic trend*/
+/*                                                                  */
+/*  <<OUTPUT>>                                                      */
+/*  testvec: a (3 x 1) vector, (m,tstara,tstarb)'                   */
+/*          tstara and tstarb are defined in p.92 for case 1 & 2.   */
+/*                                                                  */
+/*  NB:This code uses Andrews and Monahan (1992) bandwidth estimator*/
+/* NOTEs: Default setting is to print the results. It can be        */
+/*       suppressed by choosing "outpt=0" below                     */
+/*  Takashi Yamagata, 6 March 06                                    */
+/********************************************************************/
+
+
+proc(1)=PU_MP04(x_mat,m,case);
+local outpt,n,t,al,p,y_mat,y_1_mat,z,x1,qx,ztilde,ztildet,ztildel,rhohat,yhat;
+local values,vectors,zqbeta,zqbetal,resid,sigmas,sigmasq,omega;
+local lambda1,matj1,omegas,omegasq,matj2,lambda,phi4;
+local zq,zql,rhostar,hatrho,nt,tstara,tstarb,testvec;
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outpt=1;/* 1: reports ourput, 0:supress the output */
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+outwidth 256;
+
+z=x_mat;
+n=cols(z);
+t=rows(z)-1;
+
+    if case==1 or case==2;
+    
+    al = 0;    /* a1=0 implies no trend*/
+    p = -1;    /* no deterministic component estimated  */ 
+    
+    elseif case == 3;
+        al = 1;  /* linear trend*/
+        p = 1;   /* trend estimated*/
+    endif;    
+    
+              /*remove deterministic components*/
+        
+        if p == 0; 
+            x1 = ones(t+1,1);
+            qx = eye(t+1)-x1*x1'/(t+1);
+        elseif p == 1;
+            x1 = ones(t+1,1)~seqa(1,1,t+1);
+            qx = eye(t+1)-x1*inv(x1'*x1)*x1';
+        elseif p == -1;
+            qx = eye(t+1);  
+        endif;
+
+        ztilde = qx*z;        
+        ztildet = ztilde[2:t+1,.];
+        ztildel = ztilde[1:t,.];        
+        
+        rhohat = tr(ztildel*ztildet')/tr(ztildel*ztildel');
+        yhat = ztildet-rhohat*ztildel;       
+        
+        /*extract factors using normalization with smaller dimension*/
+    
+        if n <= t;
+            {values,vectors} = eighv(yhat'*yhat);              
+        else;        
+            {values,vectors} = eighv(yhat*yhat');     
+        endif;
+        
+/* number of factors should be given as "m"
+*/       
+            /*compute FM estimator*/
+
+            zqbeta = ortho(ztildet,yhat,vectors,m);      /* project ztilde onto orthogonal space */
+            zqbetal = ortho(ztildel,yhat,vectors,m);     
+            
+            resid = zqbeta-rhohat*zqbetal;
+        
+            /*compute variance of errors*/
+        
+            sigmas = sumc(abs(resid).^2)/t;
+            sigmasq = sumc(sigmas)/n;
+                        
+            /*compute long-run covariances*/
+            
+            /*(bandwidth selection based on Andrews and Monahan 1992 */  
+            omega=zeros(n,1);lambda1=zeros(n,1);                   
+            for j (1,n,1);
+                {matj1,matj2} = lrcov(resid[.,j],1,999);                
+                omega[j]=matj1;
+                lambda1[j]=matj2;
+            endfor;            
+            omegas = omega;
+            omegasq = meanc(omegas);
+            lambda = 0.5*(omegasq - sigmasq);
+            phi4 = (omegas'*omegas)/n;            
+                
+            zq = zqbetal*zqbeta';        
+            zql = zqbetal*zqbetal';        
+            
+            /* autoregressive parameter - rhostar with estimated variances */        
+            
+            if p == -1 or p==0; 
+                rhostar = (tr(zq)-n*t*meanc(diag(lambda)))/tr(zql); 
+            elseif p==1;
+                rhostar = (tr(zq)+0.5*n*t*meanc(sigmas))/tr(zql);
+            endif;
+
+            /*compute test statistics*/
+            
+            NT = sqrt(n)*t;
+            if p == -1 or p==0;
+                tstara = NT*(rhostar-1)/sqrt(2*phi4/omegasq^2);
+                tstarb = NT*(rhostar-1)*sqrt(tr(zql)/(n*t^2))*sqrt(omegasq/phi4);    
+            elseif p == 1;
+                tstara = NT*(rhostar-1)/sqrt((15/4)*phi4/omegasq^2);
+                tstarb = NT*(rhostar-1)*sqrt(tr(zql)/(n*t^2))*sqrt(4*omegasq/phi4);
+            endif;  
+testvec=(m|tstara|tstarb);
+
+/**/
+if outpt==1;
+"";
+"MOON AND PERRON (2004) PANEL UNIT ROOT TEST RESULTS";
+if case==1 or case==2;
+"In the case without trend";
+elseif case==3;
+"In the case with trend";
+endif;
+format /rd 4,0;
+"";
+"N=";;n;
+"Number of data points used:";;t+1;;"(T = ";;t;;")";
+"Given number of factors:";;m;
+"";
+format /rd 10,3;
+"tstar_a";;tstara;
+"tstar_b";;tstarb;
+"------------------------------------------------";
+endif;
+retp(testvec);
+endp;     
+
+
+
+
+/***********************************************************************/
+/*************   PROCEDURES used for Moon Perron ***********************/
+/***********************************************************************/
+
+proc(1)=tr(x);
+local tr;
+tr=sumc(diag(x));
+retp(tr);
+endp;
+
+proc(2) = LRcov(x,wght,mtd);
+local t,n,xt,xl,sigma,a,v,d,i,xpw,omega,b,resid,s_resid,s4,wght1;
+local s_deux,s_zero,delta,l,lambda,j,gama,w,qs,dinv;
+
+t=rows(x);n=cols(x);
+if n==1;
+wght1=wght;
+else;
+wght1=wght|ones(n-1,1);
+endif;
+/*prewhitening*/
+
+sigma = x'*x/t;
+
+xt = x[2:t,.];
+xl = x[1:t-1,.];
+
+a = xt'*xl*inv(xl'*xl);
+{d,v} = eighv(a);
+for i (1,n,1);
+    if (d[i,i]>0.97) or (d[i,i]<-0.97);
+        d[i,i] = 0.97*(2*(d[i,i].>1)-1);
+    endif;
+endfor;
+a = v*d*inv(v);
+
+xpw = xt - xl*a';
+
+omega = xpw'*xpw/t;
+
+/*------------------*/
+if mtd==999;
+    /* Andrews*/
+    xt = xpw[2:t-1,.];
+    xl = xpw[1:t-2,.];
+    b = diag((xt'*xl)./(xl'*xl));
+    Resid = xt-xl*diag(b);        
+    s_resid = Resid'*Resid/t;
+    s4 = diag(s_resid)^2;
+    
+    s_deux = (4*((b)^2)*s4/((1-b)^8));
+    s_zero = ( s4 ./ ((1-b).^4)); 
+    delta = 1.3221*((wght1'*(s_deux))/(wght1'*(s_zero))).^(0.2);
+    
+endif;
+/*---------------*/
+L = delta*t^(0.2);
+
+lambda = 0;
+for j (1,t-2,1);
+    gama = xpw[j+1:t-1,.]'*xpw[1:t-j-1,.]/t;
+    v=j/L;
+    w=6*pi*v/5;        
+    qs=((25./(12*((pi*v).^2))).*(((sin(w))./w)-cos(w)));
+    omega = omega + qs*(gama + gama');
+    lambda = lambda +qs*gama;
+    
+endfor;
+
+/* recolor */
+
+dinv = inv(eye(n)-a);
+omega = dinv*omega*dinv';
+lambda = dinv*lambda*dinv' + sigma*a'*dinv';
+
+retp (omega,lambda);
+endp;
+
+
+proc(1) = ortho(y,yhat,v,k);
+local t,n,loadings,factors,betahat,norm,qbeta,x;
+
+t=rows(y);n=cols(y);
+
+if n <= t;
+    loadings=sqrt(n)*v[.,n-k+1:n];
+    factors=yhat*loadings/n;
+    betahat=(yhat'*yhat)*loadings/(n*t);
+else;
+    factors=sqrt(t)*v[.,t-k+1:t];
+    loadings=yhat'*factors/t;
+    norm=loadings'*loadings/n;
+    betahat=loadings*chol(norm);
+endif;
+
+qbeta=eye(n)-betahat*inv(betahat'*betahat)*betahat';
+
+x = y*qbeta;
+
+retp(x);
+endp;
+
+/********************************************************/
+/* Gauss Procedure to estimate the number of factors    */
+/* Bai and Ng (2002), DETERMINING THE NUMBER OF         */
+/* FACTORS IN APPROXIMATE FACTOR MODELS, ECONOMETRICA   */
+/* VOL70, 191-221.                                      */
+/*                                                      */
+/* {nbfactor}=bai02(xmat,kmax);                         */
+/*                                                      */
+/* <<INPUT>>                                            */
+/* xmat: a (NxT) data matrix, where                     */
+/*          N: cross section dimension                  */
+/*          T: time series dimension                    */
+/*                                                      */
+/* kmax: maximum number of factors to set               */
+/*                                                      */
+/* <<OUTPUT>>                                           */
+/* nbfactor: a (6 x 1) vector of estimated number of    */
+/*          factors from 0,1,...,kmax                   */
+/*          Each element is based on                    */
+/*          Information Criteria defined in             */
+/*          Bai and Ng (2002; p.201):                   */
+/*          nbfactor=(PC1,PC2,PC3,IC1,IC2,IC3)'         */
+/* penmat: a (maxk+1 x 6) matrix of the information     */
+/*          criteria. Rows correspond to k=0,1,..., maxk*/
+/*          and columns corresponds to the information  */
+/*          criteron (PC1,PC2,PC3,IC1,IC2,IC3).         */
+/*                                                      */
+/*                                                      */
+/* Takashi Yamagata                                     */
+/********************************************************/
+
+proc(2)=bai02(xmat,kmax);
+local Fmatmax,Lmax,vmax,f,l;
+local x,n,t,k,penmat,res,v,c_nt,p1,p2,p3;
+local pc1,pc2,pc3,ic1,ic2,ic3,khat;
+
+{Fmatmax,Lmax,vmax}=factor(xmat,kmax);
+x=(xmat-meanc(xmat)')./(stdc(xmat)');
+n=cols(xmat);t=rows(xmat);
+
+k=0;
+penmat={};
+
+do while k<=kmax;
+
+
+if k==0;
+res=x;
+else;
+L=x/Fmatmax[.,1:k];
+res=x-Fmatmax[.,1:k]*L;
+endif;
+v=meanc(diag(res'res/T));/* V(k,Fhat)*/
+c_nt=minc(sqrt(N)|sqrt(T));
+p1=ln(n*t/(n+t))*k*(n+t)/(n*t);
+p2=ln(c_nt^2)*k*(n+t)/(n*t);
+p3=ln(c_nt^2)*k/(c_nt^2);
+
+/* IC's in Bai Ng 2002 */
+pc1=v+vmax*p1;
+pc2=v+vmax*p2;
+pc3=v+vmax*p3;
+ic1=ln(v)+p1;
+ic2=ln(v)+p2;
+ic3=ln(v)+p3;
+
+penmat=penmat|(pc1~pc2~pc3~ic1~ic2~ic3);
+
+
+k=k+1;
+endo;
+
+khat=minindc(penmat)-1;
+retp(khat,penmat);
+endp;
+
+/* Obtain Factor and 
+factor loadings given k */
+proc(3)=factor(xmat,k);
+local x,n,t,ei,eivec,Fmat,L,res,v;
+
+x=(xmat-meanc(xmat)')./(stdc(xmat)');/*standardization*/
+n=cols(xmat);t=rows(xmat);/*N and T*/
+if n>t;
+{ei,eivec}=eighv(x*x');
+
+eivec=rev(eivec')';
+
+Fmat=sqrt(T)*eivec[.,1:k];/*Ftilde of Bai-Ng (2002)*/
+L=(Fmat'x)'/T;/*Lambda-tilde of Bai-Ng (2002)*/
+
+else;
+{ei,eivec}=eighv(x'x);
+
+eivec=rev(eivec')';
+
+L=sqrt(N)*eivec[.,1:k];/*Lambda-bar of Bai-Ng (2002)*/
+Fmat=x*L/N;/*Fbar of Bai-Ng (2002)*/
+
+endif;
+
+res=x-Fmat*L';
+
+v=meanc(diag(res'res/T));
+
+retp(Fmat,L,v);
+endp;
+
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/*              PROCEDURES                  */
+/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
+/**********************/
+/* Pesaran's (2004) 
+cross section dependenc 
+test (CD test)
+and Breusch-Pagan (1980)
+LM test,
+
+{cd,lm}=cdlm(y_mat);
+
+Input: y_mat (TxN)
+N: cross section dimension
+T: time series dimension
+
+output:
+cd: Pesaran's (2004) CD test
+lm: Breusch-Pagan (1980) LM test 
+
+Under the null of no CSD,
+cd ~ N(0,1)
+lm ~ chi-squared with N(N-1)/2 dof.
+*/
+
+proc(2)=cdlm(y_mat);
+
+local t,n,r_mat,i,j,y_mat_dm,sum_r_ij,sum_r2_ij;
+local r_i,r_j,r_ij,rsq_ave,r_ave,cd,lm,nlm;
+/** rank **/
+t=rows(y_mat);
+n=cols(y_mat);
+
+y_mat_dm= y_mat - meanc(y_mat)';
+
+sum_r_ij=0;
+sum_r2_ij=0;
+
+i=1;
+do while i<=n-1;
+    j=i+1;
+        do while j<=n;
+            r_i=y_mat_dm[.,i];
+            r_j=y_mat_dm[.,j];
+            r_ij = (r_i'r_j)/(sqrt(r_i'r_i)*sqrt(r_j'r_j));
+        
+        sum_r_ij=sum_r_ij + r_ij;
+        sum_r2_ij=sum_r2_ij + r_ij^2;
+
+        j=j+1;
+        endo;
+i=i+1;
+endo;
+
+cd=sqrt(t)*sum_r_ij/sqrt(n*(n-1)/2);
+lm=(t)*sum_r2_ij;
+
+retp(cd,lm);
+endp;
