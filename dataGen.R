@@ -93,7 +93,7 @@ dataGen <- function(Tm,n,clubSize,frho,trial,noCons){
   dats<- lapply(1:trial, function(x){ cat(paste0(x,"\n")); quantt(x)} )
   
   outFile <- list(dats,ind,gammaVect)
-  outDir <- if(noCons){"Data/noCons/singleClub/"} else {"Data/withCons/singleClub/"}
+  outDir  <- if(noCons){"Data/noCons/singleClub/"} else {"Data/withCons/singleClub/"}
   dir.create(outDir,recursive = TRUE)
   nocStr<- if(noCons){"-noCons.rda"} else {"-withCons.rda"}
   fileName <-  paste0(outDir,"zZ_",Tm-1000,"-",n,"-",clubSize,"-",frho,nocStr)
@@ -139,10 +139,12 @@ dataGenplus<-function(Tm,n,k,frho,trial,noCons){
   
   ind <- lapply(gammac, function(g) which(gammaVect==g))  
   
+  set.seed(156)
+  seeds <- sample(1:10000)
   
   quantt <- function(x){
     # Generation of epsilon
-    
+    set.seed(seeds[x])
     epsMat <- sapply(1:n, function(x) arima.sim(Tm, model = list(ar=rhoVectM[x]), sd = sqrt((1-rhoVectM[x]^2)*varVectM[x])))
     
     epsMat<- epsMat[,shfs]

@@ -27,14 +27,14 @@ mcHF <- function(Tm,n,clsize,frho,noCons){
     z      <- zz[[1]][[ind]]
     
     
-  write.table(z,file = "hfcodes/datt.csv",row.names = FALSE,col.names = FALSE)
+    write.table(z,file = "hfcodes/datt.csv",row.names = FALSE,col.names = FALSE)
   ########################################################
 
   cat("Analyzing")
   
   RtoGauss <- function(crit){
-    tempHF <- shell(paste0("C:/gauss10/tgauss -b ",'RUN hfcodes\\main',crit,'.gss'), intern=TRUE,wait=TRUE)
-    tempHF <- tempHF[1:(which(tempHF=="GAUSS 10.0.3 (Dec 22 2009, 1345) 32-bit")-2)]
+    tempHF <- shell(paste0("C:/gauss6.0/tgauss -b ",'RUN hfcodes\\main',crit,'.gss'), intern=TRUE,wait=TRUE)
+    tempHF <- tempHF[1:(which(tempHF=="GAUSS 6.0.8 (Oct 14 2003) 32-bit")-2)]
     
     aCrude<- strsplit(tempHF[1:((which(tempHF=="brkpnt"))-1)]," ")
     aCrude<-lapply(1:length(aCrude), function(x) aCrude[[x]] <- aCrude[[x]][aCrude[[x]]!=""])

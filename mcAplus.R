@@ -1,4 +1,4 @@
-# Tm<-50;n<-10;k<-2;frho<-.2;ind=1; noCons=T; nopois <- T
+# Tm<-50;n<-10;k<-2;frho<-.2;ind=1; noCons=T; nopois <- F
 
 source("panelURPassFailMCA.R")
 source("mclapplyhack.R")

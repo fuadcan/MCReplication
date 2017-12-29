@@ -1,4 +1,4 @@
-# Tm=100;n=10;k=2; frho=.2; ind=1; noCons =T; nopois=F
+# Tm=50;n=10;k=2; frho=.2; ind=1; noCons =T; nopois=F
 library("stringr")
 
 mcHFplus <- function(Tm,n,k,frho,noCons,nopois){
@@ -40,10 +40,10 @@ mcHFplus <- function(Tm,n,k,frho,noCons,nopois){
     
     cat("Analyzing\n")
     
-    RtoGauss <- function(crit){
+    RtoGauss <- function(crit="05"){
     ########################################################
-      tempHF <- shell(paste0("C:/gauss10/tgauss -b ",'RUN hfcodes\\main',crit,'.gss'), intern=TRUE,wait=TRUE)
-      tempHF <- tempHF[1:(which(tempHF=="GAUSS 10.0.3 (Dec 22 2009, 1345) 32-bit")-2)]
+      tempHF <- shell(paste0("C:/gauss6.0/tgauss -b ",'RUN hfcodes\\main',crit,'.gss'), intern=TRUE,wait=TRUE)
+      tempHF <- tempHF[1:(which(grepl("GAUSS",tempHF))[1]-2)]
       
       aCrude<- strsplit(tempHF[1:((which(tempHF=="brkpnt"))-1)]," ")
       aCrude<-lapply(1:length(aCrude), function(x) aCrude[[x]] <- aCrude[[x]][aCrude[[x]]!=""])

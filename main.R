@@ -1,11 +1,13 @@
-setwd("~/MCStudy_10000//")
+setwd("~/MCStudy_10000/")
 source("dataGen.R")
 source("mcAGK.R")
 source("mcAplus.R")
+# source("mcHF_nproc.R")
 source("mcHF.R")
 source("mcHFplus.R")
 source("anlysSingle.R")
 source("anlysMulti.R")
+source("mclapplyhack.R")
 
 numofrep <- 10000
 # commands for generating data single club data:
