@@ -3,7 +3,7 @@ library("igraph")
 
 # yearOrRegion <- "Europe"
 applyHF <- function(yearOrRegion){
-  
+  # Reading data  
   if(is.numeric(yearOrRegion)){year      <- yearOrRegion
   filename  <- paste0("Application/madisonFrom-",year,".csv")
   z         <- read.table(filename,header = T,sep = ";")
@@ -34,16 +34,17 @@ applyHF <- function(yearOrRegion){
   n <- ncol(z)
   cnames <- colnames(z)
   
+  # Saving data to disc for Gauss to read
   write.table(c(nrow(z),ncol(z)),"hfcodes/dims.csv",row.names = FALSE,col.names = FALSE)
   write.table(z,file = "hfcodes/datt.csv",row.names = FALSE,col.names = FALSE)
   
     cat("Analyzing\n")
     
-    # RtoGauss <- function(){
       ########################################################
       tempHF <- shell(paste0("C:/gauss6.0/tgauss -b ",'RUN hfcodes\\main05.gss'), intern=TRUE,wait=TRUE)
       tempHF <- tempHF[1:(which(grepl("GAUSS",tempHF))[1]-2)]
       
+      # Processing outputs for absolute and relative convergence 
       aCrude<- strsplit(tempHF[1:((which(tempHF=="brkpnt"))-1)]," ")
       aCrude<-lapply(1:length(aCrude), function(x) aCrude[[x]] <- aCrude[[x]][aCrude[[x]]!=""])
       aCrude<-lapply(1:length(aCrude), function(x) as.numeric(str_replace_all(aCrude[[x]],"c","")))
@@ -71,22 +72,19 @@ applyHF <- function(yearOrRegion){
       
       ############################## END REPORT ##############################
     
-    
-    
     temp    <- cbind(cnames,gmmlHF[2,])
-    
     clubs <- temp[!duplicated(temp[,2]),2]
     clubs <- clubs[clubs!=""]
     
     clubs <- lapply(clubs, function(cl) temp[temp[,2]==cl,1])
     clubs <- clubs[order(sapply(clubs,length),decreasing = T)]
-    save(clubs, file = paste0("Results/",yearOrRegion,"_HF.rda"))  
+    save(clubs, file = paste0("Results/",yearOrRegion,"_HF.rda")) # Saving clubs to disc  
     counts <- table(temp[,2])
-    sizes <- sapply(2:max(counts), function(s) sum(counts==s))
+    sizes <- sapply(2:max(counts), function(s) sum(counts==s)) # Count of clubs per sizes
     return(sizes)
   }
   
-  
+  # Report for all
   ress1 <- lapply(c("Maddison","Penn","Europe","Europe+G7","Europe+S&P","G7+S&P"), applyHF)
   ress2 <- lapply(c(1930,1940), applyHF)
   ress  <- c(ress2,ress1)

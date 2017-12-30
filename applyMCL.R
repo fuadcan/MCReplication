@@ -4,7 +4,7 @@ library("igraph")
 # yearOrRegion <- "Penn"
 # yearOrRegion <- 1930
 applyMCL <- function(yearOrRegion){
-  
+# Reading data  
   if(is.numeric(yearOrRegion)){year      <- yearOrRegion
   filename  <- paste0("Application/madisonFrom-",year,".csv")
   z         <- read.table(filename,header = T,sep = ";")
@@ -36,6 +36,7 @@ applyMCL <- function(yearOrRegion){
   n <- ncol(z)
   cmbn <- combn(n,2)
   
+  # Panel of Pairs
   pPanel <- sapply(1:ncol(cmbn), function(i) z[,cmbn[1,i]] - z[,cmbn[2,i]])
   cnames <- colnames(z)
   colnames(pPanel) <- sapply(1:ncol(cmbn), function(i) paste0(cnames[cmbn[1,i]],"-",cnames[cmbn[2,i]]))
@@ -45,6 +46,7 @@ applyMCL <- function(yearOrRegion){
     
     if(noCons){tpA<-"none"} else {tpA<-"drift"} 
     
+    # Calculating converging pairs
     testRsltA <- apply(panel, 2, function(s) {x <- s[!is.na(s)]; if(length(x) == 0){return(10000)} else {(ur.df(x,type = tpA)@teststat)[1]}})
     cvalsA    <- apply(panel, 2, function(x) {x <- x[!is.na(x)]; Tmm <- length(x); if(Tmm == 0){res <- -10000} else {res <- (ur.df(rnorm(Tmm),type = tpA)@cval)[1,2]}})
     
@@ -52,6 +54,7 @@ applyMCL <- function(yearOrRegion){
     
     ncolZ <- ceiling(sqrt(ncol(panel)*2))
     
+    # Converting to adjacency matrix
     pmGen<-function(pf){
       pairMat<-matrix(,ncolZ,ncolZ)
       pairMat[lower.tri(pairMat)] <- pf
@@ -69,10 +72,11 @@ applyMCL <- function(yearOrRegion){
     
   }
   
+  # Adjacency matrix of the 
   pm   <- panelURPassFail(pPanel,F)
   
   # Graphs
-  gr       <- graph.adjacency(pm,"undirected",diag = F)
+  gr   <- graph.adjacency(pm,"undirected",diag = F)
   
   # Maximal Clubs
   clubs <- lapply(maximal.cliques(gr), function(c) cnames[c])
@@ -80,7 +84,7 @@ applyMCL <- function(yearOrRegion){
   clubs <- matrix(sapply(clubs[ord], function(c) paste0(c,collapse = " - ")),,1)
   write.csv(clubs, file = paste0("Results/",yearOrRegion,"MCL.csv"))
   
-  # Counts
+  # Maximal Club Counts per sizes
   lcl    <- largest.cliques(gr)
   nlcl   <- if(class(lcl)=="list"){length(lcl[[1]])} else {length(lcl)}
   counts <- sapply(2:nlcl, function(n)  sum(sapply(maximal.cliques(gr), length) == n))
@@ -97,15 +101,14 @@ applyMCL <- function(yearOrRegion){
 
 ress1 <- lapply(c("Maddison","Penn","Europe","Europe+G7","Europe+S&P","G7+S&P"), applyMCL)
 ress2 <- lapply(c(1930,1940), applyMCL)
-
-
-ress <- c(ress2,ress1)
+ress <- c(ress2,ress1) # Results for all datasets
 
 countsAll <- lapply(ress, function(r) r[[1]])
 countsAll <- t(sapply(countsAll, function(cnts) c(cnts,rep(NA,max(sapply(countsAll,length))-length(cnts)))))
 rownames(countsAll) <- c(1930,1940,"Maddison","Penn","Europe","Europe+G7","Europe+S&P","G7+S&P")
 colnames(countsAll) <- paste0('# ',2:(ncol(countsAll)+1))
 
+# Writing the reports
 write.csv(countsAll,"Results/countsAllMCL.csv")
 overlapsAll <- lapply(ress, function(r) r[[2]]) 
 save(overlapsAll,file = "Results/overlapsAllMCL.rda")
