@@ -82,7 +82,7 @@ applyMCL <- function(yearOrRegion){
   clubs <- lapply(maximal.cliques(gr), function(c) cnames[c])
   ord   <- order(sapply(clubs,length),decreasing = T)
   clubs <- matrix(sapply(clubs[ord], function(c) paste0(c,collapse = " - ")),,1)
-  write.csv(clubs, file = paste0("Results/",yearOrRegion,"MCL.csv"))
+  # write.csv(clubs, file = paste0("Results/",yearOrRegion,"MCL.csv"))
   
   # Maximal Club Counts per sizes
   lcl    <- largest.cliques(gr)

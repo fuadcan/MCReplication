@@ -78,7 +78,7 @@ applyHF <- function(yearOrRegion){
     
     clubs <- lapply(clubs, function(cl) temp[temp[,2]==cl,1])
     clubs <- clubs[order(sapply(clubs,length),decreasing = T)]
-    save(clubs, file = paste0("Results/",yearOrRegion,"_HF.rda")) # Saving clubs to disc  
+    # save(clubs, file = paste0("Results/",yearOrRegion,"_HF.rda")) # Saving clubs to disc  
     counts <- table(temp[,2])
     sizes <- sapply(2:max(counts), function(s) sum(counts==s)) # Count of clubs per sizes
     return(sizes)
