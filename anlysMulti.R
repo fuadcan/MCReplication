@@ -1,4 +1,4 @@
-# n<-20;Tm=50;frho=0.6;k=4; noCons<-T;nopois <- F
+# n<-10;Tm=50;frho=0.6;k=2; noCons<-T;nopois <- F
 
 nlyzA <- function(Tm,n,k,frho,noCons,nopois){
   
@@ -8,8 +8,8 @@ nlyzA <- function(Tm,n,k,frho,noCons,nopois){
   filename <- paste0("Results_",n,"-",k,"-A-",nocStr,"Mlt/reportA-",Tm,"-",frho,nopoistr,".rda")
   
   rep <- get(load(paste0(dir,filename)))
-  
-  nlyz <- apply(rep,1,sum)
+  head(rep,10)
+  nlyz <- apply(rep,1,mean)
   names(nlyz) <- c(".01",".05",".1")
   return(nlyz)
   
@@ -24,18 +24,18 @@ nlyzHF <- function(Tm,n,k,frho,noCons,nopois){
   filename <- paste0(dir,"Results_",n,"-",k,"-",nocStr,"Mlt_HF/reportHF-",Tm,"-",frho,nopoistr,".rda")
   repHF <- get(load(filename))[,(!noCons)+1]
   repHF <- cbind(repHF[names(repHF) == "crit01"],repHF[names(repHF) == "crit05"],repHF[names(repHF) == "crit1"])
-  nlyz  <- apply(repHF,2,sum)
+  nlyz  <- apply(repHF,2,mean)
   names(nlyz) <- c(".01",".05",".1")
   return(nlyz)
 }
 
 overallnlyz<- function(TmVec,n,k,noCons){
   
-  anlyzA  <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  nlyzA(Tm,n,k,frho,noCons,T))))
-  anlyzHF <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  nlyzHF(Tm,n,k,frho,noCons,T))))
+  anlyzA  <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  tryCatch(nlyzA(Tm,n,k,frho,noCons,T),error=function(e) rep(NA,3)))))
+  anlyzHF <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  tryCatch(nlyzHF(Tm,n,k,frho,noCons,T),error=function(e) rep(NA,3)))))
   
-  anlyzA_P  <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  nlyzA(Tm,n,k,frho,noCons,F))))
-  anlyzHF_P <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  nlyzHF(Tm,n,k,frho,noCons,F))))
+  anlyzA_P  <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  tryCatch(nlyzA(Tm,n,k,frho,noCons,F),error=function(e) rep(NA,3)))))
+  anlyzHF_P <- lapply(c(.2,.6), function(frho) t(sapply(TmVec, function(Tm)  tryCatch(nlyzHF(Tm,n,k,frho,noCons,F),error=function(e) rep(NA,3)))))
   
   
   nlyz   <- cbind(do.call(rbind,anlyzA),do.call(rbind,anlyzHF))

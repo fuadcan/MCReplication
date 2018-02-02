@@ -1,39 +1,31 @@
-c8       c26      c27      c33      
-c11      c30      c39      
-c4       c5       c18      
-c24      c32      
-c20      c35      
-c40      
-c29      
-c28      
-c25      
-c31      
-c23      
-c22      
-c21      
-c34      
-c19      
-c17      
-c16      
-c15      
+c15      c19      
+c8       c9       
+c2       c3       
+c6       c10      
+c20      
 c14      
 c13      
 c12      
-c36      
-c10      
-c9       
-c37      
+c11      
+c16      
 c7       
-c6       
-c38      
-c3       
-c2       
+c17      
+c5       
+c4       
+c18      
 c1       
 brkpnt
-c2       c3       c4       c5       c6       c7       c8       c9       
-c11      c16      c17      c18      c19      c20      c21      c23      
-c26      c27      c29      c30      c31      c33      c34      c35      
-c37      c38      c39      
-c10      c14      c15      c22      c28      
-c1       c13      c25      c40      
-c12      c24      c32      c36      
+c2       c3       c6       c10      
+c11      c18      
+c15      c19      
+c8       c9       
+c20      
+c13      
+c12      
+c14      
+c16      
+c7       
+c5       
+c4       
+c17      
+c1       

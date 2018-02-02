@@ -1,4 +1,4 @@
-# n<-10;clsize=5;Tm=100;frho=.2;noCOns=F
+# n<-10;clsize=5;Tm=100;frho=.2;noCons=F
 library("rugarch")
 hitRat <- function(maxScc,exc,clsize,n){
   UU <- maxScc; DU <- clsize-maxScc ; UD <- exc; DD <- n-clsize-exc
@@ -43,11 +43,10 @@ PTestAGK<- function(dat){
   lists <- list(dat[indAdf,],dat[indErs,],dat[indKpss,])
   
   actua <- (gmms==1)*1-(gmms!=1)*1
-  forec <- list()
-  forec <- lapply(1:length(lists), function(i) forec[[i]] <- matrix(1,nrow(lists[[1]]),ncol(lists[[1]])))
+  forec <- lapply(1:length(lists), function(i) matrix(1,nrow(lists[[1]]),ncol(lists[[1]])))
   for(i in 1:length(lists)){forec[[i]][which(lists[[i]]=="")]<- -1}
-
-  actuaVec <- rep(actua,nrow(dat)/length(lists))
+  
+  actuaVec  <- rep(actua,nrow(dat)/length(lists))
   forecVecs <- lapply(1:3, function(i) c(t(forec[[i]])))
   
   
@@ -57,7 +56,8 @@ PTestAGK<- function(dat){
   
 }
 
-
+error_list   <- lapply(1:6, function(i) matrix(,2,3))
+error_listHF <- lapply(1:6, function(i) matrix(,2,6))
 anlysofoutptAGK<- function(Tm,n,clsize,noCons){
   nocStr   <- if(noCons){"-noCons"} else {"-withCons"}
   dirName  <- if(noCons){"Output/noCons/singleClub/"} else {"Output/withCons/singleClub/"}
@@ -69,7 +69,7 @@ anlysofoutptAGK<- function(Tm,n,clsize,noCons){
   
   
 
-  trials<-100
+  trials<-10000
   TTm <- trials*3
   nT  <- 3
   
@@ -104,7 +104,7 @@ anlysofoutptAGK<- function(Tm,n,clsize,noCons){
     return(rep)
   }
   
-  tempRep <- lapply(c(2,6)/10, function(frho) anlysOutp(calcRep,clsize,frho,gmml))
+  tempRep <- lapply(c(2,6)/10, function(frho) tryCatch(anlysOutp(calcRep,clsize,frho,gmml),error=function(e) matrix(,6,3)))
   reps    <- lapply(1:6, function(x) rbind(tempRep[[1]][x,],tempRep[[2]][x,]))  
   
   
@@ -123,7 +123,7 @@ anlysofoutptHF<- function(Tm,n,clsize,noCons){
   gmml<-list()
   for(frho in c(2,6)){gmml[[frho]]<- get(load(paste0(dirName,"Results_",n,"-",clsize,nocStr,"_hf/gmmlHF-",Tm,"-",frho/10,".rda")))}
   
-  trials <- 100
+  trials <- 10000
   TTm    <- trials*3
   nT     <- 3
   
@@ -161,19 +161,19 @@ anlysofoutptHF<- function(Tm,n,clsize,noCons){
     return(anlys)
   }
   
-  tempRepp <- lapply((c(2,6))/10, function(d) anlysOutp(calcRep,clsize,d,gmml))
+  tempRepp <- lapply((c(2,6))/10, function(d) tryCatch(anlysOutp(calcRep,clsize,d,gmml),error= function(e) matrix(,6,6)))
   
   reps     <- lapply(1:6, function(x) rbind(tempRepp[[1]][x,],tempRepp[[2]][x,]))
   
   return(reps)
 }
 
-# TmVec <- c(50,75,100,200); nVec <- c(10,20,30,40); clsize <- c(3,5,7,10)
+# TmVec <- c(50,75,100,200); nVec <- c(10,20,30,40); clsize <- c(3)
 
 overallAnlys <- function(TmVec,n,clsize,noCons) {
-  nlyAGK   <- lapply(TmVec, function(Tm) anlysofoutptAGK(Tm,n,clsize,noCons))
+  nlyAGK   <- lapply(TmVec, function(Tm) tryCatch(anlysofoutptAGK(Tm,n,clsize,noCons), error=function(e) error_list))
   nlyAGK   <- lapply(1:length(nlyAGK[[1]]), function(x) do.call(rbind,lapply(nlyAGK, function(n) n[[x]])))
-  nlyHF    <- lapply(TmVec, function(Tm) anlysofoutptHF(Tm,n,clsize,noCons))
+  nlyHF    <- lapply(TmVec, function(Tm) tryCatch(anlysofoutptHF(Tm,n,clsize,noCons), error=function(e) error_listHF))
   nlyHF    <- lapply(1:length(nlyHF[[1]]), function(x)  do.call(rbind,lapply(nlyHF, function(n) n[[x]])))
   
   nocstr <- if(noCons){"A"} else {"R"}
