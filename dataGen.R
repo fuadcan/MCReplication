@@ -68,18 +68,20 @@ dataGen <- function(Tm,n,clubSize,frho,trial,noCons){
   gammaVect<- gammaVect[1:n]
   consVect <- IDList[[10]][1:n]
   
+  set.seed(156)
+  seeds <- sample(1:10000)
+  
   quantt <- function(X){
-    
-    #  Generation of epsilon
-    
+    #  Generating epsilon
+    set.seed(seeds[x])
     epsMat <- sapply(1:n, function(x) arima.sim(Tm, model = list(ar=rhoVect[x]), sd = sqrt((1-rhoVect[x]^2)*varVect[x])))
     
     
-    #  Generation of the factor
+    #  Generating the factor
     v_t <- arima.sim(n=Tm-1,model=list(ar=frho),sd=sqrt(1-frho^2))@.Data
     f_t <- 5 + c(0,cumsum(v_t))
     
-    # Generation of y_it series
+    # Generating y_it series
     
     y<-sapply(1:n,function(x) gammaVect[x]*f_t+epsMat[,x])
     
@@ -143,19 +145,19 @@ dataGenplus<-function(Tm,n,k,frho,trial,noCons){
   seeds <- sample(1:10000)
   
   quantt <- function(x){
-    # Generation of epsilon
+    # Generating epsilon
     set.seed(seeds[x])
     epsMat <- sapply(1:n, function(x) arima.sim(Tm, model = list(ar=rhoVectM[x]), sd = sqrt((1-rhoVectM[x]^2)*varVectM[x])))
     
     epsMat<- epsMat[,shfs]
     
-    #  Generation of the factor
+    #  Generating factor
     
     v_t <- arima.sim(n=Tm-1,model=list(ar=frho),sd=sqrt(1-frho^2))@.Data
     f_t <- 5 + c(0,cumsum(v_t))
     
     
-    # Generation of y_it series
+    # Generating y_it series
     if(noCons){y <- sapply(1:n, function(x) gammaVect[x]*f_t+epsMat[,x])} else
     {y<-sapply(1:n, function(x) consVect[x] + gammaVect[x]*f_t+epsMat[,x])}
     

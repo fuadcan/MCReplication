@@ -1,8 +1,8 @@
-setwd("~/MCStudy_10000/")
+if(Sys.info()[1]=='Linux') {setwd("~/Documents/MCStudy10000/")} else {setwd("~/MCStudy10000/")}
 source("dataGen.R")
+source("dataGen_old.R")
 source("mcAGK.R")
 source("mcAplus.R")
-# source("mcHF_nproc.R")
 source("mcHF.R")
 source("mcHFplus.R")
 source("anlysSingle.R")
@@ -1529,5 +1529,9 @@ mcHFplus(200,40,8,0.6,F,T)
 # Evaluating and Generating Results
 suppressWarnings(overallRep())
 suppressWarnings(overallRepMulti())
+
+# Application over Growth Datasets
+source("applyMCL.R")
+source("applyHF.R")
 
 cat("See Results folder for resulting tables")

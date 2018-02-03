@@ -4,15 +4,15 @@
 \begin{center}
 	\Large \bf Read Me 
 \end{center}
-The replication file consists the codes and helper files to replicate the Monte Carlo simulations for success of Maximal Clique and HF method. The codes can be decomposed to three steps; data generating, analyzing and evaluating. Outputs of the first two steps are files saved in disk and the last step are tables consist of evaluations.
+The replication file includes codes and helper files to replicate the Monte Carlo simulations for Maximal Clique and HF method. The codes can be decomposed to three steps; data generating, analyzing and evaluating. Outputs of the first two steps are saved to disk and the last step are tables of evaluation results. The replication file also contains the codes for application, both for MCL and HF.
 
-The codes are designed in R project version 3.11 and Gauss 10 for Windows and developed in Windows 7 64bit. To run the code trouble-free, the following requirements must be satisfied.
+The codes are designed in R project version >3.4 and Gauss 6 for Windows and run in Windows 10 64 bit OS. To run the code trouble-free, the following requirements must be satisfied.
 \begin{flushleft}
 	\large Requirements
 \end{flushleft}
 \begin{enumerate}
-\item R project, Gauss 6.0 for Windows (or newer)
-\item Following packages for R: "igraph", "urca", "stringr", "rugarch", "parallel"
+\item R project, Gauss 6.0 for Windows (or newer),
+\item Following packages for R: "igraph", "urca", "stringr", "rugarch",
 \item Gauss should be installed in directory C:/, not any subdirectory of C:/ (since the code calls Gauss from C:/gauss6.0/tgauss)
 
 \end{enumerate}
@@ -20,7 +20,7 @@ The codes are designed in R project version 3.11 and Gauss 10 for Windows and de
 \begin{flushleft}
 	\large Usage
 \end{flushleft}
-Run all the commands in main.R. The file contains commands used for data generating, analyzing and evaluating for both method and each data type. The results are saved in Results folder as csv file. NOTE: The tables in these files are re-formed for the paper but both shares same outline.
+Run all commands in main.R. The file contains commands for data generating, analyzing and evaluating for both method and each data type. The results are saved in Results folder as csv files. NOTE: The tables in these files are re-formed for the paper.
 
 \begin{flushleft}
 	\large Codes
@@ -42,7 +42,7 @@ Run all the commands in main.R. The file contains commands used for data generat
 		 	\item noCons: TRUE if logGDP series is not wanted to contain intercept.
 		 \end{itemize}
 		 
-	Outputs: (Not returned but saved to hard disk.)
+	Outputs: (Not returned but saved to the disk.)
 		 
 		 \begin{itemize}
 		 \item  z: Matrix of n countries where clubsize of them are convergent,
@@ -63,7 +63,7 @@ Run all the commands in main.R. The file contains commands used for data generat
 		\item noCons: TRUE if logGDP series is not wanted to contain intercept.
 	\end{itemize}
 	
-	Outputs: (Not returned but saved to hard disk.)
+	Outputs: (Not returned but saved to the disk.)
 	
 	\begin{itemize}
 		\item  z: Matrix of n countries form k convergence clubs
@@ -83,7 +83,7 @@ Inputs:
 	\item noCons: TRUE if logGDP series is not wanted to contain intercept.
 \end{itemize}
 
-Outputs: (Not returned but saved to hard disk.)
+Outputs: (Not returned but saved to the disk.)
 
 \begin{itemize}
 	\item  z: Matrix of n countries form k convergence clubs
@@ -91,7 +91,7 @@ Outputs: (Not returned but saved to hard disk.)
 	\item  gammas:  Vector of country factor loadings.  
 \end{itemize}
 		 
-	\item mcAGK.R: The file contains the script, mcAGK, that detects clubs of data containing \textit{single club} via maximal clique algorithm employing ADF, ADF-GLS and KPSS at 5\% significance level.
+	\item mcAGK.R: The file contains the script, mcAGK, that detects clubs of data containing \textit{single club} via MCL employing ADF at 1\%,5\% and 10\% significance levels.
 	
 		Inputs:
 		\begin{itemize}
@@ -103,14 +103,14 @@ Outputs: (Not returned but saved to hard disk.)
 			\item noCons: TRUE if logGDP series doesn't contain intercept.
 		\end{itemize}
 		
-		Outputs: (Not returned but saved to hard disk.)
+		Outputs: (Not returned but saved to the disk.)
 		
 		\begin{itemize}
 		\item Report: Matrix containing values to evaluate success,
 		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
 		\end{itemize}		 	
 		
-	\item mcHF.R: The file contains the script, mcHF, that detects both perfect and relative convergence clubs of data containing \textit{single club} via HF algorithm at 5\% significance level.
+	\item mcHF.R: The file contains the script, mcHF, that detects both perfect and relative convergence clubs of data containing \textit{single club} via HF algorithm at 1\%,5\% and 10\% significance levels.
 	
 	Inputs:
 	\begin{itemize}
@@ -126,10 +126,10 @@ Outputs: (Not returned but saved to hard disk.)
 	
 	\begin{itemize}
 		\item Report: Matrix containing values to evaluate success,
-		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+		\item Gmml: Matrix containing gammas and lists of countries that are convergent and non-convergent.
 	\end{itemize}		 	
 	
-		\item mcAplus.R: The file contains the script, mcAplus, that detects clubs of data containing \textit{multiple clubs} via maximal clique algorithm employing ADF at 5\% significance level.
+		\item mcAplus.R: The file contains the script, mcAplus, that detects clubs of data containing \textit{multiple clubs} via MCL employing ADF at 1\%,5\% and 10\% significance levels.
 		
 		Inputs:
 		\begin{itemize}
@@ -142,15 +142,15 @@ Outputs: (Not returned but saved to hard disk.)
 			\item nopois: TRUE if data is generated by dataGenplus\_old; dataGenplus otherwise.
 		\end{itemize}
 		
-		Outputs: (Not returned but saved to hard disk.)
+		Outputs: (Not returned but saved to the disk.)
 		
 		\begin{itemize}
 			\item Report: Matrix containing values to evaluate success,
-			\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+			\item Gmml: Matrix containing gammas and lists of countries that are convergent and non-convergent.
 		\end{itemize}		 	
 	\begin{itemize}
 		\item Report: Matrix containing values to evaluate success,
-		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+		\item Gmml: Matrix containing gammas and lists of countries that are convergent and non-convergent.
 	\end{itemize}		 	
 	
 	\item mcHFplus.R: The file contains the script, mcHFplus, that detects clubs of data containing \textit{multiple clubs} via HF algorithm at 5\% significance level.
@@ -166,11 +166,11 @@ Outputs: (Not returned but saved to hard disk.)
 		\item nopois: TRUE if data is generated by dataGenplus\_old; dataGenplus otherwise.
 	\end{itemize}
 	
-	Outputs: (Not returned but saved to hard disk.)
+	Outputs: (Not returned but saved to the disk.)
 	
 	\begin{itemize}
 		\item Report: Matrix containing values to evaluate success,
-		\item Gmml: Matrix containing gammas with detected convergent and non-convergent country lists.
+		\item Gmml: Matrix containing gammas and lists of countries that are convergent and non-convergent.
 	\end{itemize}		 	
 	
 	\item anlysSingle.R: The file contains the code overallRep (with its helper functions) that evaluates single club results for both cases of intercept and for both methods.
