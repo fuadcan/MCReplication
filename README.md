@@ -1,2 +1,0 @@
-# MCStudy
-Personal MC study
